@@ -11,13 +11,13 @@ namespace Bingbot
     {
         private readonly HttpClient client = new HttpClient();
 
-        public async Task<Stream> GetTextToSpeechAsync(string message)
+        public async Task<Stream> GetTextToSpeechAsync(string message, string voice)
         {
             var output = new List<byte>();
 
-            foreach (string chunk in message.Chunk(200))
+            foreach (string chunk in message.SplitOnWords(200))
             {
-                var segment = await GenerateMp3Segment(chunk, Voice.UsFemale2);
+                var segment = await GenerateMp3Segment(chunk, voice);
                 output.AddRange(segment);
             }
 

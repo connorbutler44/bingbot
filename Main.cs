@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,22 +9,8 @@ using Newtonsoft.Json.Linq;
 
 namespace Bingbot
 {
-  // This is a minimal, bare-bones example of using Discord.Net.
-  //
-  // If writing a bot with commands/interactions, we recommend using the Discord.Net.Commands/Discord.Net.Interactions
-  // framework, rather than handling them yourself, like we do in this sample.
-  //
-  // You can find samples of using the command framework:
-  // - Here, under the TextCommandFramework sample
-  // - At the guides: https://discordnet.dev/guides/text_commands/intro.html
-  //
-  // You can find samples of using the interaction framework:
-  // - Here, under the InteractionFramework sample
-  // - At the guides: https://discordnet.dev/guides/int_framework/intro.html
     class Program
     {
-        // Non-static readonly fields can only be assigned in a constructor.
-        // If you want to assign it elsewhere, consider removing the readonly keyword.
         private readonly DiscordSocketClient _client;
         private readonly TextToSpeechService _ttsService;
 
@@ -38,15 +25,13 @@ namespace Bingbot
 
         public Program()
         {
-            // It is recommended to Dispose of a client when you are finished
-            // using it, at the end of your app's lifetime.
             _client = new DiscordSocketClient();
 
             // Subscribing to client events, so that we may receive them whenever they're invoked.
             _client.Log += LogAsync;
             _client.Ready += ReadyAsync;
             _client.MessageReceived += MessageReceivedAsync;
-            _client.InteractionCreated += InteractionCreatedAsync;
+            _client.ReactionAdded += ReactionAddedAsync;
 
             _ttsService = new TextToSpeechService();
         }
@@ -80,35 +65,57 @@ namespace Bingbot
             return Task.CompletedTask;
         }
 
-        // This is not the recommended way to write a bot - consider
-        // reading over the Commands Framework sample.
         private async Task MessageReceivedAsync(SocketMessage message)
         {
             // The bot should never respond to itself.
             if (message.Author.Id == _client.CurrentUser.Id)
                 return;
 
-            if (message.Content.Length > 200)
+            // if (message.Content.Length > 200)
+            // {
+            //     var stream = await _ttsService.GetTextToSpeechAsync(message.Content);
+            //     await message.Channel.SendFileAsync(stream, "media.mp3");
+            // }
+            return;
+        }
+
+        private async Task ReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> originChannel, SocketReaction reaction)
+        {
+            var message = await cachedMessage.GetOrDownloadAsync();
+
+            if (reaction.Emote.Name == "📣" && message.Content.Trim().Length > 0)
             {
-                var stream = await _ttsService.GetTextToSpeechAsync(message.Content);
-                await message.Channel.SendFileAsync(stream, "media.mp3");
+                var voice = GetVoice(message.Reactions.Keys);
+                var stream = await _ttsService.GetTextToSpeechAsync(message.Content, voice);
+                await message.Channel.SendFileAsync(stream: stream, filename: "media.mp3", messageReference: new MessageReference(message.Id));
             }
         }
 
-        // For better functionality & a more developer-friendly approach to handling any kind of interaction, refer to:
-        // https://discordnet.dev/guides/int_framework/intro.html
-        private async Task InteractionCreatedAsync(SocketInteraction interaction)
-        {
-            // safety-casting is the best way to prevent something being cast from being null.
-            // If this check does not pass, it could not be cast to said type.
-            if (interaction is SocketMessageComponent component)
+        private static readonly Dictionary<string, string> emoteDictionary = new Dictionary<string, string>()
             {
-                // Check for the ID created in the button mentioned above.
-                if (component.Data.CustomId == "unique-id")
-                    await interaction.RespondAsync("Thank you for clicking my button!");
+                { "🐻", Voice.Chewbacca },
+                { "🤖", Voice.C3PO },
+                { "🦝", Voice.Rocket },
+                { "jarrad", Voice.AusMale },
+                { "a", Voice.UkMale },
+                { "👩", Voice.UsFemale },
+                { "BOGGED", Voice.FrenchMale },
+                { "🇩🇪", Voice.GermanMale },
+                { "c", Voice.SpanishMale },
+                { "d", Voice.JpFemale },
+                { "e", Voice.KoreanMale },
+            };
 
-                else Console.WriteLine("An ID has been received that has no handler!");
+        private string GetVoice(IEnumerable<IEmote> reactions)
+        {
+            foreach(IEmote reaction in reactions)
+            {
+                if (emoteDictionary.ContainsKey(reaction.Name))
+                    return emoteDictionary[reaction.Name];
             }
+
+            // fallback to UsFemale if no valid reaction is found
+            return Voice.UsFemale;
         }
     }
 }

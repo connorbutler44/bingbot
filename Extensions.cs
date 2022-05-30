@@ -1,19 +1,25 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 public static class Extensions
 {
-    public static IEnumerable<string> Chunk(this string str, int n)
+    public static List<string> SplitOnWords(this string inputText, int chunkLength)
     {
-        if (String.IsNullOrEmpty(str) || n < 1)
+        List<string> chunkList = new List<string>();
+
+        while (inputText.Length > 0)
         {
-            throw new ArgumentException();
+            if (inputText == null || inputText.Length < chunkLength || inputText.LastIndexOf(" ", chunkLength) == -1)
+            {
+                chunkList.Add(inputText);
+                break;
+            }
+
+            string chunk = inputText.Substring(0, inputText.LastIndexOf(" ", chunkLength));
+            chunkList.Add(chunk);
+
+            inputText = inputText.Substring(chunk.Length + 1);
         }
 
-        var chunkCount = (str.Length / n) + 1;
-        return Enumerable
-            .Range(0, chunkCount)
-            .Select(i => (i == chunkCount - 1) ? str.Substring(i * n) : str.Substring(i * n, n));
+        return chunkList;
     }
 }

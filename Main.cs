@@ -28,9 +28,6 @@ namespace Bingbot
         private readonly DiscordSocketClient _client;
         private readonly TextToSpeechService _ttsService;
 
-        private const string InputFileName = "input.txt";
-        private const string Mp3FileName = "voice.mp3";
-        private const string TtsScriptPath = "C:\\Projects\\tiktok-voice\\main.py";
 
         // Discord.Net heavily utilizes TAP for async, so we create
         // an asynchronous context from the beginning.

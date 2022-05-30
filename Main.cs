@@ -9,23 +9,24 @@ using System.Text;
 
 namespace Bingbot
 {
-    // This is a minimal, bare-bones example of using Discord.Net.
-    //
-    // If writing a bot with commands/interactions, we recommend using the Discord.Net.Commands/Discord.Net.Interactions
-    // framework, rather than handling them yourself, like we do in this sample.
-    //
-    // You can find samples of using the command framework:
-    // - Here, under the TextCommandFramework sample
-    // - At the guides: https://discordnet.dev/guides/text_commands/intro.html
-    //
-    // You can find samples of using the interaction framework:
-    // - Here, under the InteractionFramework sample
-    // - At the guides: https://discordnet.dev/guides/int_framework/intro.html
+  // This is a minimal, bare-bones example of using Discord.Net.
+  //
+  // If writing a bot with commands/interactions, we recommend using the Discord.Net.Commands/Discord.Net.Interactions
+  // framework, rather than handling them yourself, like we do in this sample.
+  //
+  // You can find samples of using the command framework:
+  // - Here, under the TextCommandFramework sample
+  // - At the guides: https://discordnet.dev/guides/text_commands/intro.html
+  //
+  // You can find samples of using the interaction framework:
+  // - Here, under the InteractionFramework sample
+  // - At the guides: https://discordnet.dev/guides/int_framework/intro.html
     class Program
     {
         // Non-static readonly fields can only be assigned in a constructor.
         // If you want to assign it elsewhere, consider removing the readonly keyword.
         private readonly DiscordSocketClient _client;
+        private readonly TextToSpeechService _ttsService;
 
         private const string InputFileName = "input.txt";
         private const string Mp3FileName = "voice.mp3";
@@ -50,6 +51,8 @@ namespace Bingbot
             _client.Ready += ReadyAsync;
             _client.MessageReceived += MessageReceivedAsync;
             _client.InteractionCreated += InteractionCreatedAsync;
+
+            _ttsService = new TextToSpeechService();
         }
 
         public async Task MainAsync()
@@ -89,45 +92,9 @@ namespace Bingbot
 
             if (message.Content.Length > 200)
             {
-                await SendCopypastaTts(message);
+                var stream = await _ttsService.GetTextToSpeechAsync(message.Content);
+                await message.Channel.SendFileAsync(stream, "media.mp3");
             }
-        }
-
-        private async Task SendCopypastaTts(SocketMessage message)
-        {
-            try {
-                // create temporary file used for command input
-                using (FileStream fs = File.Create(InputFileName))
-                {
-                    byte[] info = new UTF8Encoding(true).GetBytes(message.Content);
-                    fs.Write(info, 0, info.Length);
-                }
-
-                ProcessStartInfo start = new ProcessStartInfo();
-                start.FileName = "py";
-                start.Arguments = $"{TtsScriptPath} -v {Voice.UsFemale2} -f {InputFileName}";
-                start.UseShellExecute = false;
-                start.RedirectStandardOutput = true;
-
-                using(Process process = Process.Start(start))
-                {
-                    using(StreamReader reader = process.StandardOutput)
-                    {
-                        string result = await reader.ReadToEndAsync();
-                        await message.Channel.SendFileAsync(Mp3FileName);
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("Error converting input to TTS");
-                Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                File.Delete(Mp3FileName);
-                File.Delete(InputFileName);
-            }            
         }
 
         // For better functionality & a more developer-friendly approach to handling any kind of interaction, refer to:

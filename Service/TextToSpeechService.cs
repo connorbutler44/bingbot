@@ -4,8 +4,6 @@ using System.Net.Http;
 using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text;
-using Discord;
 
 namespace Bingbot
 {

@@ -73,11 +73,12 @@ namespace Bingbot
                 return;
 
             // any DM's the bot recieves will send the TTS to a specific channel
-            if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0) {
-                var fbpClient = await _client.GetChannelAsync(DM_CHANNEL_ID);
+            if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0)
+            {
+                var fbpChannel = await _client.GetChannelAsync(DM_CHANNEL_ID);
                 
                 var stream = await _ttsService.GetTextToSpeechAsync(message.Content, Voice.UsFemale);
-                await (fbpClient as ITextChannel).SendFileAsync(stream: stream, filename: "media.mp3");
+                await (fbpChannel as ITextChannel).SendFileAsync(stream: stream, filename: "media.mp3");
             }
             return;
         }

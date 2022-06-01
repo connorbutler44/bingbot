@@ -13,6 +13,7 @@ namespace Bingbot
     {
         private readonly DiscordSocketClient _client;
         private readonly TextToSpeechService _ttsService;
+        private readonly ulong DM_CHANNEL_ID = 688040246499475525;
 
 
         // Discord.Net heavily utilizes TAP for async, so we create
@@ -71,11 +72,13 @@ namespace Bingbot
             if (message.Author.Id == _client.CurrentUser.Id)
                 return;
 
-            // if (message.Content.Length > 200)
-            // {
-            //     var stream = await _ttsService.GetTextToSpeechAsync(message.Content);
-            //     await message.Channel.SendFileAsync(stream, "media.mp3");
-            // }
+            // any DM's the bot recieves will send the TTS to a specific channel
+            if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0) {
+                var fbpClient = await _client.GetChannelAsync(DM_CHANNEL_ID);
+                
+                var stream = await _ttsService.GetTextToSpeechAsync(message.Content, Voice.UsFemale);
+                await (fbpClient as ITextChannel).SendFileAsync(stream: stream, filename: "media.mp3");
+            }
             return;
         }
 

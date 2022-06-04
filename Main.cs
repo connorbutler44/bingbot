@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -89,8 +90,9 @@ namespace Bingbot
 
             if (reaction.Emote.Name == "📣" && message.Content.Trim().Length > 0)
             {
-                var voice = GetVoice(message.Reactions.Keys);
-                var stream = await _ttsService.GetTextToSpeechAsync(message.Content, voice);
+                string sanitizedInput = Regex.Replace(message.Content, @"<a{0,1}:(\w+):[0-9]+>", "$1");
+                string voice = GetVoice(message.Reactions.Keys);
+                Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice);
                 await message.Channel.SendFileAsync(stream: stream, filename: "media.mp3", messageReference: new MessageReference(message.Id));
             }
         }

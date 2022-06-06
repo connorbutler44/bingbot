@@ -11,5 +11,7 @@ public static class Voice
     public const string SpanishMale = "es_002";
     public const string JpFemale = "jp_001";
     public const string KoreanMale = "kr_004";
+    public const string AltoFemale = "en_female_f08_salut_damour";
+    public const string TenorMale = "en_male_m03_lobby";
 
 }

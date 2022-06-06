@@ -37,15 +37,12 @@ namespace Bingbot
 
             _ttsService = new TextToSpeechService();
         }
-
-        public async Task MainAsync()
+    
+            public async Task MainAsync()
         {
             JObject env = JObject.Parse(File.ReadAllText(@"./.env.json"));
 
-            // Tokens should be considered secret data, and never hard-coded.
             await _client.LoginAsync(TokenType.Bot, env.GetValue("API_KEY").ToString());
-            // Different approaches to making your token a secret is by putting them in local .json, .yaml, .xml or .txt files, then reading them on startup.
-
             await _client.StartAsync();
 
             // Block the program until it is closed.
@@ -74,13 +71,13 @@ namespace Bingbot
                 return;
 
             // any DM's the bot recieves will send the TTS to a specific channel
-            if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0)
-            {
-                var fbpChannel = await _client.GetChannelAsync(DM_CHANNEL_ID);
+            // if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0)
+            // {
+            //     var fbpChannel = await _client.GetChannelAsync(DM_CHANNEL_ID);
                 
-                var stream = await _ttsService.GetTextToSpeechAsync(message.Content, Voice.UsFemale);
-                await (fbpChannel as ITextChannel).SendFileAsync(stream: stream, filename: "media.mp3");
-            }
+            //     var stream = await _ttsService.GetTextToSpeechAsync(message.Content, Voice.UsFemale);
+            //     await (fbpChannel as ITextChannel).SendFileAsync(stream: stream, filename: "media.mp3");
+            // }
             return;
         }
 
@@ -110,6 +107,8 @@ namespace Bingbot
                 { "c", Voice.SpanishMale },
                 { "d", Voice.JpFemale },
                 { "e", Voice.KoreanMale },
+                { "🎵", Voice.AltoFemale },
+                { "z", Voice.TenorMale },
             };
 
         private string GetVoice(IEnumerable<IEmote> reactions)

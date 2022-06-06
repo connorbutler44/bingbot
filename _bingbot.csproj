@@ -9,4 +9,9 @@
     <PackageReference Include="Discord.Net.WebSocket" Version="3.6.1"/>
   </ItemGroup>
 
+  <ItemGroup>
+      <Content Include="./.env.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+  </ItemGroup>
 </Project>

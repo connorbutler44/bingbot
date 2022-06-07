@@ -44,13 +44,13 @@ jobs:
     steps:
       - name: Executing remote SSH commands
         uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.SERVER_HOST }}
-            username: ${{ secrets.SSH_USERNAME }}
-            key: ${{ secrets.SSH_KEY }}
-            script: |
-              cd /var/
-              unzip bingbot.zip && rm bingbot.zip
-              cd bingbot
-              sudo pkill _bingbot
-              dotnet run &
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/
+            unzip bingbot.zip && rm bingbot.zip
+            cd bingbot
+            sudo pkill _bingbot
+            dotnet run &

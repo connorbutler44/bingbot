@@ -22,7 +22,7 @@ jobs:
       - name: Zip build artifact
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r /bin/Release/net6.0/publish bingbot
+          args: zip -qq -r bingbot.zip /bin/Release/net6.0/publish
       - name: Copy files to remote server
         uses: appleboy/scp-action@master
         with:

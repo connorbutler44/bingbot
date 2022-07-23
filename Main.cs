@@ -17,7 +17,7 @@ namespace Bingbot
         private readonly DiscordSocketClient _client;
         private readonly TextToSpeechService _ttsService;
         private readonly ulong DM_CHANNEL_ID = 688040246499475525;
-        private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/e09f33b52829a75286aa76ba0101718717c2949e/gistfile1.txt";
+        private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/05373087ebad19bcc3f6ff4f7823942693d7d1e4/bingbot_voice_codes.json";
 
         private Dictionary<string, string> emoteDictionary = new Dictionary<string, string>();
 

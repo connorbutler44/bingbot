@@ -30,13 +30,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           
             cd /dev/bingbot/ &&
-            sudo su &&
-            git checkout master &&
-            git fetch --all &&
-            git reset --hard origin/master &&
-            git pull origin master &&
-            pkill _bingbot &&
-            dotnet run &
+            sudo git checkout master &&
+            sudo git fetch --all &&
+            sudo git reset --hard origin/master &&
+            sudo git pull origin master &&
+            sudo pkill _bingbot &&
+            sudo dotnet run &
           '
 
       - name: Remove Github Actions IP from security group

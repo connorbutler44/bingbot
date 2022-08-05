@@ -79,7 +79,7 @@ namespace Bingbot
             if (message.Content == "!emoterefresh")
             {
                 await RefreshEmoteDictionary();
-                await message.Channel.SendMessageAsync("Emote Dictionary Refreshed 👍");
+                await message.Channel.SendMessageAsync("Test Full Integration 👍");
             }
 
             // any DM's the bot recieves will send the TTS to a specific channel

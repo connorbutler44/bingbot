@@ -54,6 +54,7 @@ jobs:
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           
+            cd /tmp/ &&
             sudo docker stop bingbot &&
             sudo docker rm bingbot || true &&
             sudo docker rmi bingbot:latest || true &&

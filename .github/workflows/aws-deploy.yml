@@ -31,8 +31,8 @@ jobs:
         run: dotnet publish --configuration Release
       - name: Create Docker Image
         run: |
-          docker build -t bingbot-img .
-          docker save -o ./bingbot.tar bingbot-img
+          docker build -t bingbot:latest .
+          docker save -o ./bingbot.tar bingbot:latest
           gzip bingbot.tar
       - name: Transfer Image to Server
         env:
@@ -57,7 +57,7 @@ jobs:
             cd /tmp/ &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
-            sudo docker run --env DISCORD_API_KEY=$DISCORD_API_KEY
+            sudo docker run --env DISCORD_API_KEY=$DISCORD_API_KEY bingbot:latest
           '
 
       - name: Remove Github Actions IP from security group

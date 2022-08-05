@@ -46,6 +46,7 @@ namespace Bingbot
         public async Task MainAsync()
         {
             string apiKey = Environment.GetEnvironmentVariable("DISCORD_API_KEY");
+            Console.WriteLine(apiKey);
 
             await _client.LoginAsync(TokenType.Bot, apiKey);
             await _client.StartAsync();

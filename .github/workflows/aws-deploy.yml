@@ -33,7 +33,7 @@ jobs:
         run: |
           docker build -t bingbot-img .
           docker save -o ./bingbot.tar bingbot-img
-          gzip bingbot.tar.gz
+          gzip bingbot.tar
       - name: Transfer Image to Server
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key

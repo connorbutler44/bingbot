@@ -48,7 +48,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
           HOSTNAME : ${{ secrets.HOSTNAME  }}
           USER_NAME : ${{ secrets.USERNAME  }}
-          DISCORD_API_KEY : ${{ secrets.DISCORD_API_KEY }}
             
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key

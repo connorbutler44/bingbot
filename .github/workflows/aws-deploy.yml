@@ -55,8 +55,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           
             sudo docker stop bingbot &&
-            sudo docker rm bingbot &&
-            sudo docker rmi bingbot:latest &&
+            sudo docker rm bingbot || true &&
+            sudo docker rmi bingbot:latest || true &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
             sudo docker run -d --env DISCORD_API_KEY=$DISCORD_API_KEY --name bingbot bingbot:latest

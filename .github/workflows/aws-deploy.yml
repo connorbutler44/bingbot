@@ -57,7 +57,7 @@ jobs:
             cd /tmp/ &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
-            sudo docker run --env DISCORD_API_KEY=$DISCORD_API_KEY bingbot:latest
+            sudo docker run -d --env DISCORD_API_KEY=$DISCORD_API_KEY bingbot:latest
           '
 
       - name: Remove Github Actions IP from security group

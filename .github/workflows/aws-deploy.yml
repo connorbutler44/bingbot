@@ -37,6 +37,8 @@ jobs:
       - name: Transfer Image to Server
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+          HOSTNAME : ${{ secrets.HOSTNAME  }}
+          USER_NAME : ${{ secrets.USERNAME  }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key ./bingbot.tar.gz ${USER_NAME}@${HOSTNAME}:/tmp/

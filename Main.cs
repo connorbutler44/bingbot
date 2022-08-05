@@ -45,9 +45,9 @@ namespace Bingbot
     
         public async Task MainAsync()
         {
-            JObject env = JObject.Parse(File.ReadAllText(@"./.env.json"));
+            string apiKey = Environment.GetEnvironmentVariable("DISCORD_API_KEY");
 
-            await _client.LoginAsync(TokenType.Bot, env.GetValue("API_KEY").ToString());
+            await _client.LoginAsync(TokenType.Bot, apiKey);
             await _client.StartAsync();
             await RefreshEmoteDictionary();
 
@@ -79,7 +79,7 @@ namespace Bingbot
             if (message.Content == "!emoterefresh")
             {
                 await RefreshEmoteDictionary();
-                await message.Channel.SendMessageAsync("huh 👍");
+                await message.Channel.SendMessageAsync("Emote Dictionary Refreshed 👍");
             }
 
             // any DM's the bot recieves will send the TTS to a specific channel

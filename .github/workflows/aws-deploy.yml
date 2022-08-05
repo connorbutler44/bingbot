@@ -8,6 +8,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Get Github action IP
         id: ip
         uses: haythem/public-ip@v1.2
@@ -19,23 +21,39 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build Project
+        run: dotnet publish --configuration Release
+      - name: Create Docker Image
+        run: |
+          docker build -t bingbot-img .
+          docker save -o ./bingbot.tar bingbot-img
+          gzip bingbot.tar.gz
+      - name: Transfer Image to Server
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key ./bingbot.tar.gz ${USER_NAME}@${HOSTNAME}:/tmp/
+
       - name: Deploy to EC2
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
           HOSTNAME : ${{ secrets.HOSTNAME  }}
           USER_NAME : ${{ secrets.USERNAME  }}
+          DISCORD_API_KEY : ${{ secrets.DISCORD_API_KEY }}
             
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           
-            cd /dev/bingbot/ &&
-            sudo git checkout main &&
-            sudo git fetch --all &&
-            sudo git reset --hard origin/main &&
-            sudo git pull origin main &&
-            sudo pkill _bingbot &&
-            sudo dotnet run &
+            cd /tmp/ &&
+            sudo docker load -i bingbot.tar.gz &&
+            sudo rm bingbot.tar.gz &&
+            sudo docker run --env DISCORD_API_KEY=$DISCORD_API_KEY
           '
 
       - name: Remove Github Actions IP from security group

@@ -29,8 +29,14 @@ namespace Bingbot
             if (message.Length > 200)
                 throw new ArgumentOutOfRangeException("Message must be 200 characters or less");
 
-            string url = $"https://api16-normal-useast5.us.tiktokv.com/media/api/text/speech/invoke/?text_speaker={speaker}&req_text={message}&speaker_map_type=0";
-            HttpResponseMessage response = await client.PostAsync(url, null);
+            string cookie = Environment.GetEnvironmentVariable("TTS_COOKIE");
+            string host = Environment.GetEnvironmentVariable("TTS_HOST");
+
+            string url = $"https://{host}/media/api/text/speech/invoke/?text_speaker={speaker}&req_text={message}&speaker_map_type=0&aid=1233";
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            // must provide sessionid to tiktok otherwise request is rejected (this may be fragile and need to be updated over time)
+            request.Headers.Add("Cookie", cookie);
+            HttpResponseMessage response = await client.SendAsync(request);
 
             response.EnsureSuccessStatusCode();
 

@@ -32,6 +32,9 @@ namespace Bingbot
             string cookie = Environment.GetEnvironmentVariable("TTS_COOKIE");
             string host = Environment.GetEnvironmentVariable("TTS_HOST");
 
+            Console.WriteLine($"Cookie {cookie}");
+            Console.WriteLine($"Host {host}");
+
             string url = $"https://{host}/media/api/text/speech/invoke/?text_speaker={speaker}&req_text={message}&speaker_map_type=0&aid=1233";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
             // must provide sessionid to tiktok otherwise request is rejected (this may be fragile and need to be updated over time)

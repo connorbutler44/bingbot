@@ -14,10 +14,14 @@ namespace Bingbot
 {
     class Program
     {
+        HttpClient client = new HttpClient();
         private readonly DiscordSocketClient _client;
         private readonly TextToSpeechService _ttsService;
         private readonly ulong DM_CHANNEL_ID = 688040246499475525;
         private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/05373087ebad19bcc3f6ff4f7823942693d7d1e4/bingbot_voice_codes.json";
+        private readonly string MEME_URL = "https://gist.githubusercontent.com/connorbutler44/2c953da6f8fc11908c047e76c6953392/raw/356d78ae797751ddb63714562c819508ec5b3cc0/xqc.txt";
+        private readonly string MEME_URL2 = "https://gist.githubusercontent.com/connorbutler44/35cb9efc69ea6a364e2937a78ff21a0d/raw/f63a20cdce05a183b32ee99f0ec2d063ddee5ed2/xqc2.txt";
+
 
         private Dictionary<string, string> emoteDictionary = new Dictionary<string, string>();
 
@@ -82,6 +86,19 @@ namespace Bingbot
                 await message.Channel.SendMessageAsync("Emote Dictionary Refreshed 👍");
             }
 
+            // dumb meme
+            if (message.Content.ToLower().Contains("xqc"))
+            {
+                var response1 = await client.GetAsync(MEME_URL);
+                var text1 = await response1.Content.ReadAsStringAsync();
+
+                var response2 = await client.GetAsync(MEME_URL2);
+                var text2 = await response2.Content.ReadAsStringAsync();
+
+                await message.Channel.SendMessageAsync(text: text1, messageReference: new MessageReference(message.Id));
+                await message.Channel.SendMessageAsync(text: text2, messageReference: new MessageReference(message.Id));
+            }
+
             // any DM's the bot recieves will send the TTS to a specific channel
             // if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0)
             // {
@@ -125,7 +142,6 @@ namespace Bingbot
         {
             Console.WriteLine("Refreshing Emote Dictionary");
 
-            HttpClient client = new HttpClient();
             Stream response = await client.GetStreamAsync(VOICE_CODES_URL);
             var voiceCodes = JsonSerializer.Deserialize<List<VoiceCode>>(response);
 

@@ -129,6 +129,7 @@ namespace Bingbot
                     )
                     {
                         Console.WriteLine("Clip isn't relevant");
+                        return;
                     }
 
                     Embed postEmbed = GenerateTwitchClipEmbed(post, clip, streamer);

@@ -6,21 +6,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using Reddit;
+using Reddit.Controllers;
+using Reddit.Controllers.EventArgs;
+using TwitchLib.Api;
 
 namespace Bingbot
 {
     class Program
     {
         HttpClient client = new HttpClient();
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordSocketClient _discordClient;
+        private readonly RedditClient _redditClient;
+        private readonly TwitchAPI _twitchClient;
         private readonly TextToSpeechService _ttsService;
-        private readonly ulong DM_CHANNEL_ID = 688040246499475525;
+        private readonly ulong DISCORD_CHANNEL_POST_STREAM_ID = 980586815046180864;
         private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/05373087ebad19bcc3f6ff4f7823942693d7d1e4/bingbot_voice_codes.json";
-        private readonly string MEME_URL = "https://gist.githubusercontent.com/connorbutler44/2c953da6f8fc11908c047e76c6953392/raw/356d78ae797751ddb63714562c819508ec5b3cc0/xqc.txt";
-        private readonly string MEME_URL2 = "https://gist.githubusercontent.com/connorbutler44/35cb9efc69ea6a364e2937a78ff21a0d/raw/f63a20cdce05a183b32ee99f0ec2d063ddee5ed2/xqc2.txt";
 
 
         private Dictionary<string, string> emoteDictionary = new Dictionary<string, string>();
@@ -36,13 +39,19 @@ namespace Bingbot
 
         public Program()
         {
-            _client = new DiscordSocketClient();
+            _discordClient = new DiscordSocketClient();
+            SetupDiscordClient();
 
-            // Subscribing to client events, so that we may receive them whenever they're invoked.
-            _client.Log += LogAsync;
-            _client.Ready += ReadyAsync;
-            _client.MessageReceived += MessageReceivedAsync;
-            _client.ReactionAdded += ReactionAddedAsync;
+            _redditClient = new RedditClient(
+                appId: Environment.GetEnvironmentVariable("REDDIT_CLIENT_ID"),
+                refreshToken: Environment.GetEnvironmentVariable("REDDIT_REFRESH_TOKEN"),
+                appSecret: Environment.GetEnvironmentVariable("REDDIT_CLIENT_SECRET")
+            );
+            SetupRedditClient();
+
+            _twitchClient = new TwitchAPI();
+            _twitchClient.Settings.ClientId = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ID");
+            _twitchClient.Settings.AccessToken = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ACCESS_TOKEN");            
 
             _ttsService = new TextToSpeechService();
         }
@@ -51,12 +60,28 @@ namespace Bingbot
         {
             string apiKey = Environment.GetEnvironmentVariable("DISCORD_API_KEY");
 
-            await _client.LoginAsync(TokenType.Bot, apiKey);
-            await _client.StartAsync();
+            await _discordClient.LoginAsync(TokenType.Bot, apiKey);
+            await _discordClient.StartAsync();
             await RefreshEmoteDictionary();
 
             // Block the program until it is closed.
             await Task.Delay(Timeout.Infinite);
+        }
+
+        private void SetupDiscordClient()
+        {
+            _discordClient.Log += LogAsync;
+            _discordClient.Ready += ReadyAsync;
+            _discordClient.MessageReceived += MessageReceivedAsync;
+            _discordClient.ReactionAdded += ReactionAddedAsync;
+        }
+
+        private void SetupRedditClient()
+        {
+            var lsf = _redditClient.Subreddit("LivestreamFail");
+            lsf.Posts.GetNew();
+            lsf.Posts.MonitorNew();
+            lsf.Posts.NewUpdated += NewLsfPostsRecieved;
         }
 
         private Task LogAsync(LogMessage log)
@@ -69,34 +94,89 @@ namespace Bingbot
         // connection and it is now safe to access the cache.
         private Task ReadyAsync()
         {
-            Console.WriteLine($"{_client.CurrentUser} is connected!");
+            Console.WriteLine($"{_discordClient.CurrentUser} is connected!");
 
             return Task.CompletedTask;
+        }
+
+        private async void NewLsfPostsRecieved(object sender, PostsUpdateEventArgs e)
+        {
+            foreach (Post post in e.Added)
+            {
+                try
+                {
+                    // no self-posts will be in this queue - safe to assume it's a LinkPost
+                    string postUrl = ((LinkPost)post).URL;
+                    if (!postUrl.Contains("clips.twitch.tv"))
+                    {
+                        Console.WriteLine($"Unsupported clip format {postUrl}");
+                        return;
+                    }
+
+                    // channel to send the update stream to
+                    var channel = await _discordClient.GetChannelAsync(DISCORD_CHANNEL_POST_STREAM_ID);
+
+                    // extract the clip id (there are more clip URL formats but generally this format is used - works well enough for the meme)
+                    var clipId = Regex.Match(postUrl, @"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)").Groups[1].Value;
+                    
+                    var clip = (await _twitchClient.Helix.Clips.GetClipsAsync(new List<string>{ clipId })).Clips[0];
+                    var streamer = (await _twitchClient.Helix.Users.GetUsersAsync(logins: new List<string>{ clip.BroadcasterName } )).Users[0];
+
+                    if (
+                        !postUrl.ToLower().Contains("xqc") &&
+                        !clip.Title.ToLower().Contains("xqc") &&
+                        !streamer.DisplayName.ToLower().Contains("xqc")
+                    )
+                    {
+                        Console.WriteLine("Clip isn't relevant");
+                    }
+
+                    Embed postEmbed = GenerateTwitchClipEmbed(post, clip, streamer);
+                    await (channel as ITextChannel).SendMessageAsync(embed: postEmbed);
+                }
+                catch(Exception err)
+                {
+                    Console.WriteLine("Error processing post", err.StackTrace);
+                }
+            }
+        }
+
+        private Embed GenerateTwitchClipEmbed(
+            Post post,
+            TwitchLib.Api.Helix.Models.Clips.GetClips.Clip clip,
+            TwitchLib.Api.Helix.Models.Users.GetUsers.User streamer
+        )
+        {
+            var embed = new EmbedBuilder
+                {
+                    Title = post.Title,
+                    Description = $"[Reddit thread](https://reddit.com{post.Permalink})",
+                    Url = clip.Url,
+                    Color = new Color(r: 145, g: 70, b: 255),
+                    ImageUrl = clip.ThumbnailUrl
+                };
+            var author = new EmbedAuthorBuilder
+                {
+                    Name = streamer.DisplayName,
+                    Url = $"https://twitch.tv/{streamer.DisplayName}",
+                    IconUrl = streamer.ProfileImageUrl
+                };
+            
+            return embed.WithAuthor(author)
+                .WithCurrentTimestamp()
+                .Build();
         }
 
         private async Task MessageReceivedAsync(SocketMessage message)
         {
             // The bot should never respond to itself.
-            if (message.Author.Id == _client.CurrentUser.Id)
+            if (message.Author.Id == _discordClient.CurrentUser.Id)
                 return;
 
             if (message.Content == "!emoterefresh")
             {
                 await RefreshEmoteDictionary();
                 await message.Channel.SendMessageAsync("Emote Dictionary Refreshed 👍");
-            }
-
-            // dumb meme
-            if (message.Content.ToLower().Contains("xqc"))
-            {
-                var response1 = await client.GetAsync(MEME_URL);
-                var text1 = await response1.Content.ReadAsStringAsync();
-
-                var response2 = await client.GetAsync(MEME_URL2);
-                var text2 = await response2.Content.ReadAsStringAsync();
-
-                await message.Channel.SendMessageAsync(text: text1, messageReference: new MessageReference(message.Id));
-                await message.Channel.SendMessageAsync(text: text2, messageReference: new MessageReference(message.Id));
             }
 
             // any DM's the bot recieves will send the TTS to a specific channel

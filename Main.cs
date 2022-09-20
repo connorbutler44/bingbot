@@ -124,6 +124,7 @@ namespace Bingbot
 
                     if (
                         !postUrl.ToLower().Contains("xqc") &&
+                        !post.Title.ToLower().Contains("xqc") &&
                         !clip.Title.ToLower().Contains("xqc") &&
                         !streamer.DisplayName.ToLower().Contains("xqc")
                     )

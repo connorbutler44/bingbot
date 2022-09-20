@@ -22,7 +22,7 @@ namespace Bingbot
         private readonly RedditClient _redditClient;
         private readonly TwitchAPI _twitchClient;
         private readonly TextToSpeechService _ttsService;
-        private readonly ulong DISCORD_CHANNEL_POST_STREAM_ID = 980586815046180864;
+        private readonly ulong DISCORD_CHANNEL_POST_STREAM_ID = 937843457039429642;
         private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/05373087ebad19bcc3f6ff4f7823942693d7d1e4/bingbot_voice_codes.json";
 
 

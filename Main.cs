@@ -129,7 +129,7 @@ namespace Bingbot
                         !streamer.DisplayName.ToLower().Contains("xqc")
                     )
                     {
-                        Console.WriteLine("Clip isn't relevant");
+                        Console.WriteLine($"Clip isn't relevant {postUrl}, {post.Title}, {clip.Title}, {streamer.DisplayName}");
                         return;
                     }
 
@@ -138,7 +138,9 @@ namespace Bingbot
                 }
                 catch(Exception err)
                 {
-                    Console.WriteLine("Error processing post", err.StackTrace);
+                    Console.WriteLine("Error processing post");
+                    Console.WriteLine(err);
+                    Console.WriteLine($"Problematic post: {post.Permalink}");
                 }
             }
         }

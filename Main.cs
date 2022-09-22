@@ -102,13 +102,15 @@ namespace Bingbot
 
         private async Task SetupSlashCommands()
         {
+            List<ApplicationCommandProperties> applicationCommandProperties = new();
 
             var globalCommand = new SlashCommandBuilder();
             globalCommand.WithName("drama-update");
             globalCommand.WithDescription("Drama update :)");
+            applicationCommandProperties.Add(globalCommand.Build());
 
             try {
-                await _discordClient.CreateGlobalApplicationCommandAsync(globalCommand.Build());
+                await _discordClient.BulkOverwriteGlobalApplicationCommandsAsync(applicationCommandProperties.ToArray());
             }
             catch(Exception exception)
             {

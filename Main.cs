@@ -62,7 +62,6 @@ namespace Bingbot
 
             await _discordClient.LoginAsync(TokenType.Bot, apiKey);
             await _discordClient.StartAsync();
-            await RefreshEmoteDictionary();
 
             // Block the program until it is closed.
             await Task.Delay(Timeout.Infinite);
@@ -71,9 +70,10 @@ namespace Bingbot
         private void SetupDiscordClient()
         {
             _discordClient.Log += LogAsync;
-            _discordClient.Ready += ReadyAsync;
+            _discordClient.Ready += DiscordClientReadyAsync;
             _discordClient.MessageReceived += MessageReceivedAsync;
             _discordClient.ReactionAdded += ReactionAddedAsync;
+            _discordClient.SlashCommandExecuted += SlashCommandHandlerAsync;
         }
 
         private void SetupRedditClient()
@@ -92,11 +92,35 @@ namespace Bingbot
 
         // The Ready event indicates that the client has opened a
         // connection and it is now safe to access the cache.
-        private Task ReadyAsync()
+        private async Task DiscordClientReadyAsync()
         {
             Console.WriteLine($"{_discordClient.CurrentUser} is connected!");
 
-            return Task.CompletedTask;
+            await RefreshEmoteDictionary();
+            await SetupSlashCommands();
+        }
+
+        private async Task SetupSlashCommands()
+        {
+
+            var globalCommand = new SlashCommandBuilder();
+            globalCommand.WithName("drama-update");
+            globalCommand.WithDescription("Drama update :)");
+
+            try {
+                await _discordClient.CreateGlobalApplicationCommandAsync(globalCommand.Build());
+            }
+            catch(Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+        }
+
+        private async Task SlashCommandHandlerAsync(SocketSlashCommand command)
+        {
+            Console.WriteLine($"Executed command {command.Data.Name}");
+
+            await command.RespondAsync("🖕");
         }
 
         private async void NewLsfPostsRecieved(object sender, PostsUpdateEventArgs e)

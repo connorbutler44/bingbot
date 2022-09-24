@@ -79,9 +79,9 @@ namespace Bingbot
         private void SetupRedditClient()
         {
             var lsf = _redditClient.Subreddit("LivestreamFail");
-            lsf.Posts.GetNew();
-            lsf.Posts.MonitorNew();
-            lsf.Posts.NewUpdated += NewLsfPostsRecieved;
+            // lsf.Posts.GetNew();
+            // lsf.Posts.MonitorNew();
+            // lsf.Posts.NewUpdated += NewLsfPostsRecieved;
         }
 
         private Task LogAsync(LogMessage log)

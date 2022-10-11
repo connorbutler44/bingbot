@@ -8,9 +8,6 @@ using Discord;
 using Discord.WebSocket;
 using System.Net.Http;
 using System.Text.Json;
-using Reddit;
-using Reddit.Controllers;
-using Reddit.Controllers.EventArgs;
 using TwitchLib.Api;
 
 namespace Bingbot
@@ -19,7 +16,6 @@ namespace Bingbot
     {
         HttpClient client = new HttpClient();
         private readonly DiscordSocketClient _discordClient;
-        private readonly RedditClient _redditClient;
         private readonly TwitchAPI _twitchClient;
         private readonly TextToSpeechService _ttsService;
         private readonly ulong DISCORD_CHANNEL_POST_STREAM_ID = 937843457039429642;
@@ -42,16 +38,9 @@ namespace Bingbot
             _discordClient = new DiscordSocketClient();
             SetupDiscordClient();
 
-            _redditClient = new RedditClient(
-                appId: Environment.GetEnvironmentVariable("REDDIT_CLIENT_ID"),
-                refreshToken: Environment.GetEnvironmentVariable("REDDIT_REFRESH_TOKEN"),
-                appSecret: Environment.GetEnvironmentVariable("REDDIT_CLIENT_SECRET")
-            );
-            SetupRedditClient();
-
             _twitchClient = new TwitchAPI();
             _twitchClient.Settings.ClientId = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ID");
-            _twitchClient.Settings.AccessToken = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ACCESS_TOKEN");            
+            _twitchClient.Settings.AccessToken = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ACCESS_TOKEN");
 
             _ttsService = new TextToSpeechService();
         }
@@ -74,14 +63,6 @@ namespace Bingbot
             _discordClient.MessageReceived += MessageReceivedAsync;
             _discordClient.ReactionAdded += ReactionAddedAsync;
             _discordClient.SlashCommandExecuted += SlashCommandHandlerAsync;
-        }
-
-        private void SetupRedditClient()
-        {
-            var lsf = _redditClient.Subreddit("LivestreamFail");
-            // lsf.Posts.GetNew();
-            // lsf.Posts.MonitorNew();
-            // lsf.Posts.NewUpdated += NewLsfPostsRecieved;
         }
 
         private Task LogAsync(LogMessage log)
@@ -138,78 +119,6 @@ namespace Bingbot
                     break;
             }
 
-        }
-
-        private async void NewLsfPostsRecieved(object sender, PostsUpdateEventArgs e)
-        {
-            foreach (Post post in e.Added)
-            {
-                try
-                {
-                    // no self-posts will be in this queue - safe to assume it's a LinkPost
-                    string postUrl = ((LinkPost)post).URL;
-                    if (!postUrl.Contains("clips.twitch.tv"))
-                    {
-                        Console.WriteLine($"Unsupported clip format {postUrl}");
-                        return;
-                    }
-
-                    // channel to send the update stream to
-                    var channel = await _discordClient.GetChannelAsync(DISCORD_CHANNEL_POST_STREAM_ID);
-
-                    // extract the clip id (there are more clip URL formats but generally this format is used - works well enough for the meme)
-                    var clipId = Regex.Match(postUrl, @"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)").Groups[1].Value;
-                    
-                    var clip = (await _twitchClient.Helix.Clips.GetClipsAsync(new List<string>{ clipId })).Clips[0];
-                    var streamer = (await _twitchClient.Helix.Users.GetUsersAsync(logins: new List<string>{ clip.BroadcasterName } )).Users[0];
-
-                    if (
-                        !postUrl.ToLower().Contains("xqc") &&
-                        !post.Title.ToLower().Contains("xqc") &&
-                        !clip.Title.ToLower().Contains("xqc") &&
-                        !streamer.DisplayName.ToLower().Contains("xqc")
-                    )
-                    {
-                        Console.WriteLine($"Clip isn't relevant {postUrl}, {post.Title}, {clip.Title}, {streamer.DisplayName}");
-                        return;
-                    }
-
-                    Embed postEmbed = GenerateTwitchClipEmbed(post, clip, streamer);
-                    await (channel as ITextChannel).SendMessageAsync(embed: postEmbed);
-                }
-                catch(Exception err)
-                {
-                    Console.WriteLine("Error processing post");
-                    Console.WriteLine(err);
-                    Console.WriteLine($"Problematic post: {post.Permalink}");
-                }
-            }
-        }
-
-        private Embed GenerateTwitchClipEmbed(
-            Post post,
-            TwitchLib.Api.Helix.Models.Clips.GetClips.Clip clip,
-            TwitchLib.Api.Helix.Models.Users.GetUsers.User streamer
-        )
-        {
-            var embed = new EmbedBuilder
-                {
-                    Title = post.Title,
-                    Description = $"[Reddit thread](https://reddit.com{post.Permalink})",
-                    Url = clip.Url,
-                    Color = new Color(r: 145, g: 70, b: 255),
-                    ImageUrl = clip.ThumbnailUrl
-                };
-            var author = new EmbedAuthorBuilder
-                {
-                    Name = streamer.DisplayName,
-                    Url = $"https://twitch.tv/{streamer.DisplayName}",
-                    IconUrl = streamer.ProfileImageUrl
-                };
-            
-            return embed.WithAuthor(author)
-                .WithCurrentTimestamp()
-                .Build();
         }
 
         private async Task MessageReceivedAsync(SocketMessage message)

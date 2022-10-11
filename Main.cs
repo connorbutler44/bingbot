@@ -104,10 +104,16 @@ namespace Bingbot
         {
             List<ApplicationCommandProperties> applicationCommandProperties = new();
 
-            var globalCommand = new SlashCommandBuilder();
-            globalCommand.WithName("drama-update");
-            globalCommand.WithDescription("Drama update :)");
-            applicationCommandProperties.Add(globalCommand.Build());
+            var dramaCommand = new SlashCommandBuilder();
+            dramaCommand.WithName("drama-update");
+            dramaCommand.WithDescription("Drama update :)");
+            applicationCommandProperties.Add(dramaCommand.Build());
+
+            var imagineCommand = new SlashCommandBuilder();
+            imagineCommand.WithName("imagine");
+            imagineCommand.WithDescription("There are endless possibilities...");
+            imagineCommand.AddOption("prompt", ApplicationCommandOptionType.String, "The prompt to imagine", isRequired: true);
+            applicationCommandProperties.Add(imagineCommand.Build());
 
             try {
                 await _discordClient.BulkOverwriteGlobalApplicationCommandsAsync(applicationCommandProperties.ToArray());
@@ -122,7 +128,16 @@ namespace Bingbot
         {
             Console.WriteLine($"Executed command {command.Data.Name}");
 
-            await command.RespondAsync("🖕");
+            switch (command.Data.Name)
+            {
+                case "drama-update":
+                    await command.RespondAsync("🖕");
+                    break;
+                case "imagine":
+                    await command.RespondAsync("https://cdn.discordapp.com/attachments/688040246499475525/1029238380829093918/unknown.png");
+                    break;
+            }
+
         }
 
         private async void NewLsfPostsRecieved(object sender, PostsUpdateEventArgs e)

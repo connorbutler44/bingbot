@@ -133,7 +133,7 @@ namespace Bingbot
                 case "drama-update":
                     await command.RespondAsync("🖕");
                     break;
-                case "imagine":
+                case "bingbot-imagine":
                     await command.RespondAsync("https://cdn.discordapp.com/attachments/688040246499475525/1029238380829093918/unknown.png");
                     break;
             }

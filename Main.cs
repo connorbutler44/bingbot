@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using System.Net.Http;
 using System.Text.Json;
 using TwitchLib.Api;
+using System.Linq;
 
 namespace Bingbot
 {
@@ -17,8 +18,7 @@ namespace Bingbot
         HttpClient client = new HttpClient();
         private readonly DiscordSocketClient _discordClient;
         private readonly TwitchAPI _twitchClient;
-        private readonly TextToSpeechService _ttsService;
-        private readonly ulong DISCORD_CHANNEL_POST_STREAM_ID = 937843457039429642;
+        private readonly ITextToSpeechService _ttsService;
         private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/05373087ebad19bcc3f6ff4f7823942693d7d1e4/bingbot_voice_codes.json";
 
 
@@ -42,9 +42,9 @@ namespace Bingbot
             _twitchClient.Settings.ClientId = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ID");
             _twitchClient.Settings.AccessToken = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ACCESS_TOKEN");
 
-            _ttsService = new TextToSpeechService();
+            _ttsService = new ElevenLabsTextToSpeechService();
         }
-    
+
         public async Task MainAsync()
         {
             string apiKey = Environment.GetEnvironmentVariable("DISCORD_API_KEY");
@@ -85,21 +85,25 @@ namespace Bingbot
         {
             List<ApplicationCommandProperties> applicationCommandProperties = new();
 
-            var dramaCommand = new SlashCommandBuilder();
-            dramaCommand.WithName("drama-update");
-            dramaCommand.WithDescription("Drama update :)");
-            applicationCommandProperties.Add(dramaCommand.Build());
+            var ttsCommand = new SlashCommandBuilder();
+            ttsCommand.WithName("tts");
+            ttsCommand.WithDescription("ElevenLabs AI Text to Speech");
 
-            var imagineCommand = new SlashCommandBuilder();
-            imagineCommand.WithName("imagine");
-            imagineCommand.WithDescription("There are endless possibilities...");
-            imagineCommand.AddOption("prompt", ApplicationCommandOptionType.String, "The prompt to imagine", isRequired: true);
-            applicationCommandProperties.Add(imagineCommand.Build());
+            var options = new ApplicationCommandOptionChoiceProperties[] {
+                new ApplicationCommandOptionChoiceProperties{ Name = "Rachel", Value = "21m00Tcm4TlvDq8ikWAM" },
+                new ApplicationCommandOptionChoiceProperties{ Name = "Arnold", Value = "VR6AewLTigWG4xSOukaG" },
+                new ApplicationCommandOptionChoiceProperties{ Name = "Bella", Value = "EXAVITQu4vr4xnSDxMaL" },
+            };
 
-            try {
+            ttsCommand.AddOption(name: "voice", type: ApplicationCommandOptionType.String, description: "Voice to be used for tts", isRequired: true, choices: options);
+            ttsCommand.AddOption(name: "text", type: ApplicationCommandOptionType.String, description: "Text to be used for tts", isRequired: true);
+            applicationCommandProperties.Add(ttsCommand.Build());
+
+            try
+            {
                 await _discordClient.BulkOverwriteGlobalApplicationCommandsAsync(applicationCommandProperties.ToArray());
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Console.WriteLine(exception);
             }
@@ -111,14 +115,31 @@ namespace Bingbot
 
             switch (command.Data.Name)
             {
-                case "drama-update":
-                    await command.RespondAsync("🖕");
-                    break;
-                case "imagine":
-                    await command.RespondAsync("https://cdn.discordapp.com/attachments/688040246499475525/1029238380829093918/unknown.png");
+                case "tts":
+                    await TextToSpeechCommandHandlerAsync(command);
                     break;
             }
 
+        }
+
+        private async Task TextToSpeechCommandHandlerAsync(SocketSlashCommand command)
+        {
+            await command.RespondAsync("You got it, boss. Working on it...");
+
+            var voice = (String)command.Data.Options.ElementAt(0).Value;
+            var text = (String)command.Data.Options.ElementAt(1).Value;
+
+            string sanitizedInput = Regex.Replace(text, @"<a{0,1}:(\w+):[0-9]+>", "$1");
+
+            Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice);
+
+            var fileAttachment = new FileAttachment(stream: stream, fileName: "media.mp3");
+
+            await command.ModifyOriginalResponseAsync(x =>
+            {
+                x.Attachments = new List<FileAttachment>() { fileAttachment };
+                x.Content = "Here ya go boss";
+            });
         }
 
         private async Task MessageReceivedAsync(SocketMessage message)
@@ -132,15 +153,6 @@ namespace Bingbot
                 await RefreshEmoteDictionary();
                 await message.Channel.SendMessageAsync("Emote Dictionary Refreshed 👍");
             }
-
-            // any DM's the bot recieves will send the TTS to a specific channel
-            // if (message.Channel.GetChannelType() == ChannelType.DM && message.Content.Trim().Length > 0)
-            // {
-            //     var fbpChannel = await _client.GetChannelAsync(DM_CHANNEL_ID);
-                
-            //     var stream = await _ttsService.GetTextToSpeechAsync(message.Content, Voice.UsFemale);
-            //     await (fbpChannel as ITextChannel).SendFileAsync(stream: stream, filename: "media.mp3");
-            // }
             return;
         }
 
@@ -159,7 +171,7 @@ namespace Bingbot
 
         private string GetVoice(IEnumerable<IEmote> reactions)
         {
-            foreach(IEmote reaction in reactions)
+            foreach (IEmote reaction in reactions)
             {
                 if (emoteDictionary.ContainsKey(reaction.Name))
                     return emoteDictionary[reaction.Name];
@@ -181,7 +193,7 @@ namespace Bingbot
 
             var emoteDict = new Dictionary<string, string>();
 
-            foreach(var voiceCode in voiceCodes)
+            foreach (var voiceCode in voiceCodes)
             {
                 emoteDict.Add(voiceCode.emote, voiceCode.code);
             }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Bingbot
 {
-    class TextToSpeechService
+    class TiktokTextToSpeechService : ITextToSpeechService
     {
         private readonly HttpClient client = new HttpClient();
 
@@ -35,7 +35,7 @@ namespace Bingbot
             string url = $"https://{host}/media/api/text/speech/invoke/?text_speaker={speaker}&req_text={message}&speaker_map_type=0&aid=1233";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
             // must provide sessionid to tiktok otherwise request is rejected (this may be fragile and need to be updated over time)
-            request.Headers.Add("Cookie", cookie);
+            request.Headers.Add("Cookie", $"sessionid={cookie}");
             HttpResponseMessage response = await client.SendAsync(request);
 
             response.EnsureSuccessStatusCode();

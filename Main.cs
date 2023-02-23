@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using System.Net.Http;
-using System.Text.Json;
-using TwitchLib.Api;
 
 namespace Bingbot
 {
@@ -16,9 +14,7 @@ namespace Bingbot
     {
         HttpClient client = new HttpClient();
         private readonly DiscordSocketClient _discordClient;
-        private readonly TwitchAPI _twitchClient;
         private readonly ITextToSpeechService _ttsService;
-        private readonly string VOICE_CODES_URL = "https://gist.githubusercontent.com/connorbutler44/118d8c69e42de0113cd629fc5985b625/raw/05373087ebad19bcc3f6ff4f7823942693d7d1e4/bingbot_voice_codes.json";
 
 
         private Dictionary<string, string> emoteDictionary = new Dictionary<string, string>();
@@ -36,10 +32,6 @@ namespace Bingbot
         {
             _discordClient = new DiscordSocketClient();
             SetupDiscordClient();
-
-            _twitchClient = new TwitchAPI();
-            _twitchClient.Settings.ClientId = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ID");
-            _twitchClient.Settings.AccessToken = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ACCESS_TOKEN");
 
             _ttsService = new ElevenLabsTextToSpeechService();
         }
@@ -76,7 +68,6 @@ namespace Bingbot
         {
             Console.WriteLine($"{_discordClient.CurrentUser} is connected!");
 
-            await RefreshEmoteDictionary();
             await SetupSlashCommands();
         }
 
@@ -191,64 +182,17 @@ namespace Bingbot
             });
         }
 
-        private async Task MessageReceivedAsync(SocketMessage message)
+        private Task MessageReceivedAsync(SocketMessage message)
         {
             // The bot should never respond to itself.
             if (message.Author.Id == _discordClient.CurrentUser.Id)
-                return;
-
-            if (message.Content == "!emoterefresh")
-            {
-                await RefreshEmoteDictionary();
-                await message.Channel.SendMessageAsync("Emote Dictionary Refreshed 👍");
-            }
-            return;
+                return Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         private async Task ReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> originChannel, SocketReaction reaction)
         {
             var message = await cachedMessage.GetOrDownloadAsync();
-
-            if (reaction.Emote.Name == "📣" && message.Content.Trim().Length > 0)
-            {
-                string sanitizedInput = Regex.Replace(message.Content, @"<a{0,1}:(\w+):[0-9]+>", "$1");
-                string voice = GetVoice(message.Reactions.Keys);
-                // Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice, stability: null, clarity: null);
-                // await message.Channel.SendFileAsync(stream: stream, filename: "media.mp3", messageReference: new MessageReference(message.Id));
-            }
-        }
-
-        private string GetVoice(IEnumerable<IEmote> reactions)
-        {
-            foreach (IEmote reaction in reactions)
-            {
-                if (emoteDictionary.ContainsKey(reaction.Name))
-                    return emoteDictionary[reaction.Name];
-            }
-
-            // fallback to UsFemale if no valid reaction is found
-            return Voice.UsFemale;
-        }
-
-        /*
-            Emote voice mappings are stored in a gist so we can easily update them without committing/redeploying the bot
-        */
-        private async Task RefreshEmoteDictionary()
-        {
-            Console.WriteLine("Refreshing Emote Dictionary");
-
-            Stream response = await client.GetStreamAsync(VOICE_CODES_URL);
-            var voiceCodes = JsonSerializer.Deserialize<List<VoiceCode>>(response);
-
-            var emoteDict = new Dictionary<string, string>();
-
-            foreach (var voiceCode in voiceCodes)
-            {
-                emoteDict.Add(voiceCode.emote, voiceCode.code);
-            }
-
-            this.emoteDictionary = emoteDict;
-            return;
         }
     }
 }

@@ -97,6 +97,7 @@ namespace Bingbot
                 new ApplicationCommandOptionChoiceProperties{ Name = "Whopper", Value = "Zuzo46BJSET6252mCZX5" },
                 new ApplicationCommandOptionChoiceProperties{ Name = "Tim Gunn", Value = "lQV6YBaetZO5fb2n1JSV" },
                 new ApplicationCommandOptionChoiceProperties{ Name = "Halo Announcer", Value = "2mY0k5zCDvLApJhuUvS4" },
+                new ApplicationCommandOptionChoiceProperties{ Name = "Cortana", Value = "G5JvFs8Ivxbn4PsafONN" },
             };
 
             ttsCommand.AddOption(name: "voice", type: ApplicationCommandOptionType.String, description: "Voice to be used for tts", isRequired: true, choices: options);

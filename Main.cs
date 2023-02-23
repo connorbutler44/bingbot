@@ -148,21 +148,21 @@ namespace Bingbot
             string voice = null, text = null;
             float? stabilty = null, clarity = null;
 
-            foreach (var test in command.Data.Options)
+            foreach (var option in command.Data.Options)
             {
-                switch (test.Name)
+                switch (option.Name)
                 {
                     case "voice":
-                        voice = (String)test.Value;
+                        voice = (String)option.Value;
                         break;
                     case "text":
-                        text = (String)test.Value;
+                        text = (String)option.Value;
                         break;
                     case "stability":
-                        stabilty = ((float)(long)test.Value) / 100;
+                        stabilty = ((float)(long)option.Value) / 100;
                         break;
                     case "clarity":
-                        clarity = ((float)(long)test.Value) / 100;
+                        clarity = ((float)(long)option.Value) / 100;
                         break;
                     default:
                         break;

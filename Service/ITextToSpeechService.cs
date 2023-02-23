@@ -3,5 +3,5 @@ using System.IO;
 
 interface ITextToSpeechService
 {
-    Task<Stream> GetTextToSpeechAsync(string message, string voice);
+    Task<Stream> GetTextToSpeechAsync(string message, string voice, float? stability, float? clarity);
 }

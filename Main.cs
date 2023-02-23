@@ -9,7 +9,6 @@ using Discord.WebSocket;
 using System.Net.Http;
 using System.Text.Json;
 using TwitchLib.Api;
-using System.Linq;
 
 namespace Bingbot
 {
@@ -100,8 +99,32 @@ namespace Bingbot
                 new ApplicationCommandOptionChoiceProperties{ Name = "Cortana", Value = "G5JvFs8Ivxbn4PsafONN" },
             };
 
-            ttsCommand.AddOption(name: "voice", type: ApplicationCommandOptionType.String, description: "Voice to be used for tts", isRequired: true, choices: options);
-            ttsCommand.AddOption(name: "text", type: ApplicationCommandOptionType.String, description: "Text to be used for tts", isRequired: true);
+            ttsCommand.AddOption(
+                name: "voice",
+                type: ApplicationCommandOptionType.String,
+                description: "Voice to be used for tts",
+                isRequired: true,
+                choices: options);
+            ttsCommand.AddOption(
+                name: "text",
+                type: ApplicationCommandOptionType.String,
+                description: "Text to be used for tts",
+                isRequired: true);
+            ttsCommand.AddOption(
+                name: "stability",
+                type: ApplicationCommandOptionType.Integer,
+                description: "0-100. Higher values: consistency + monotonality. Lower values: More expressive + instability.",
+                minValue: 0,
+                maxValue: 100,
+                isRequired: false);
+            ttsCommand.AddOption(
+                name: "clarity",
+                type: ApplicationCommandOptionType.Integer,
+                description: "0-100. Higher values for better clarity but could cause artifacting. Lower if artifacts is present.",
+                minValue: 0,
+                maxValue: 100,
+                isRequired: false);
+
             applicationCommandProperties.Add(ttsCommand.Build());
 
             try
@@ -131,12 +154,33 @@ namespace Bingbot
         {
             await command.RespondAsync("You got it, boss. Working on it...");
 
-            var voice = (String)command.Data.Options.ElementAt(0).Value;
-            var text = (String)command.Data.Options.ElementAt(1).Value;
+            string voice = null, text = null;
+            float? stabilty = null, clarity = null;
+
+            foreach (var test in command.Data.Options)
+            {
+                switch (test.Name)
+                {
+                    case "voice":
+                        voice = (String)test.Value;
+                        break;
+                    case "text":
+                        text = (String)test.Value;
+                        break;
+                    case "stability":
+                        stabilty = ((float)(long)test.Value) / 100;
+                        break;
+                    case "clarity":
+                        clarity = ((float)(long)test.Value) / 100;
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             string sanitizedInput = Regex.Replace(text, @"<a{0,1}:(\w+):[0-9]+>", "$1");
 
-            Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice);
+            Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice, stabilty, clarity);
 
             var fileAttachment = new FileAttachment(stream: stream, fileName: "media.mp3");
 
@@ -169,8 +213,8 @@ namespace Bingbot
             {
                 string sanitizedInput = Regex.Replace(message.Content, @"<a{0,1}:(\w+):[0-9]+>", "$1");
                 string voice = GetVoice(message.Reactions.Keys);
-                Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice);
-                await message.Channel.SendFileAsync(stream: stream, filename: "media.mp3", messageReference: new MessageReference(message.Id));
+                // Stream stream = await _ttsService.GetTextToSpeechAsync(sanitizedInput, voice, stability: null, clarity: null);
+                // await message.Channel.SendFileAsync(stream: stream, filename: "media.mp3", messageReference: new MessageReference(message.Id));
             }
         }
 

@@ -30,7 +30,7 @@ namespace Bingbot
         public Program()
         {
             _configuration = new ConfigurationBuilder()
-                .AddJsonFile("./appsettings.json", optional: false)
+                // .AddJsonFile("./appsettings.json", optional: false)
                 .Build();
 
             _services = new ServiceCollection()

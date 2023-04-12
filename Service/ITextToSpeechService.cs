@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using System.IO;
 
-interface ITextToSpeechService
+public interface ITextToSpeechService
 {
-    Task<Stream> GetTextToSpeechAsync(string message, string voice, float? stability, float? clarity);
+    Task<Stream> GetTextToSpeechAsync(string message, string voice, int? stability, int? clarity);
 }

@@ -6,16 +6,16 @@ using System.Net.Http.Json;
 
 namespace Bingbot
 {
-    class ElevenLabsTextToSpeechService : ITextToSpeechService
+    public class ElevenLabsTextToSpeechService : ITextToSpeechService
     {
         private readonly HttpClient client = new HttpClient();
 
-        public Task<Stream> GetTextToSpeechAsync(string message, string voice, float? stability, float? clarity)
+        public Task<Stream> GetTextToSpeechAsync(string message, string voice, int? stability, int? clarity)
         {
             return GenerateMp3Segment(message, voice, stability, clarity);
         }
 
-        private async Task<Stream> GenerateMp3Segment(string message, string speaker, float? stability, float? clarity)
+        private async Task<Stream> GenerateMp3Segment(string message, string speaker, int? stability, int? clarity)
         {
             string apiKey = Environment.GetEnvironmentVariable("ELEVEN_LABS_API_KEY");
             string url = $"https://api.elevenlabs.io/v1/text-to-speech/{speaker}";
@@ -31,12 +31,10 @@ namespace Bingbot
 
             response.EnsureSuccessStatusCode();
 
-            var test = await response.Content.ReadAsStringAsync();
-
             return await response.Content.ReadAsStreamAsync();
         }
 
-        private JsonContent generateRequestBody(string message, float? stability, float? clarity)
+        private JsonContent generateRequestBody(string message, int? stability, int? clarity)
         {
             // elevenlabs API errors if null values are passed for any of the voice_settings properties so we must
             // conditionally add those properties to the request. Probably a better way to do this but don't know c#
@@ -46,7 +44,7 @@ namespace Bingbot
                 var content = new
                 {
                     text = message,
-                    voice_settings = new { stability = stability, similarity_boost = clarity }
+                    voice_settings = new { stability = ((float)(long)stability) / 100, similarity_boost = ((float)(long)clarity) / 100 }
                 };
                 return JsonContent.Create(content);
             }
@@ -55,7 +53,7 @@ namespace Bingbot
                 var content = new
                 {
                     text = message,
-                    voice_settings = new { stability = stability, similarity_boost = 0.75 }
+                    voice_settings = new { stability = ((float)(long)stability) / 100, similarity_boost = 0.75 }
                 };
                 return JsonContent.Create(content);
             }
@@ -64,7 +62,7 @@ namespace Bingbot
                 var content = new
                 {
                     text = message,
-                    voice_settings = new { stability = 0.75, similarity_boost = clarity }
+                    voice_settings = new { stability = 0.75, similarity_boost = ((float)(long)clarity) / 100 }
                 };
                 return JsonContent.Create(content);
             }

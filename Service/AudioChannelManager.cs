@@ -15,12 +15,19 @@ namespace Bingbot
             _serviceProvider = serviceProvider;
         }
 
-        public void Add(ulong guildID, IAudioClient audioClient)
+        public void Add(ulong guildID, ulong channelId, IAudioClient audioClient)
         {
             var outputStream = audioClient.CreatePCMStream(AudioApplication.Mixed);
 
-            var audioPlayer = new AudioPlayer(audioClient, outputStream);
+            var audioPlayer = new AudioPlayer(channelId, audioClient, outputStream);
             _audioClients[guildID] = audioPlayer;
+        }
+
+        public AudioPlayer TryRemove(ulong guildID)
+        {
+            var removed = _audioClients.TryRemove(guildID, out AudioPlayer audioPlayer);
+
+            return audioPlayer;
         }
 
         public AudioPlayer Get(ulong guildID)

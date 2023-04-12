@@ -7,11 +7,13 @@ namespace Bingbot
 {
     public class AudioPlayer
     {
+        public ulong _channelId;
         IAudioClient _audioClient;
         AudioOutStream _outputStream;
 
-        public AudioPlayer(IAudioClient audioClient, AudioOutStream outputStream)
+        public AudioPlayer(ulong channelId, IAudioClient audioClient, AudioOutStream outputStream)
         {
+            _channelId = channelId;
             _audioClient = audioClient;
             _outputStream = outputStream;
         }

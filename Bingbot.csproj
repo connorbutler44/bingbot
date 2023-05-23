@@ -14,5 +14,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="CliWrap" Version="3.6.0" />
+    <PackageReference Include="Betalgo.OpenAI" Version="6.8.6" />
   </ItemGroup>
 </Project>

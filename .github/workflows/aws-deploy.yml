@@ -62,7 +62,7 @@ jobs:
             sudo docker rmi bingbot:latest || true &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
-            sudo docker run -d --env DISCORD_API_KEY=$DISCORD_API_KEY --env TTS_COOKIE=$TTS_COOKIE --env TTS_HOST=$TTS_HOST --env REDDIT_CLIENT_ID=$REDDIT_CLIENT_ID --env REDDIT_REFRESH_TOKEN=$REDDIT_REFRESH_TOKEN --env REDDIT_CLIENT_SECRET=$REDDIT_CLIENT_SECRET --env TWITCH_CLIENT_ID=$TWITCH_CLIENT_ID --env TWITCH_CLIENT_ACCESS_TOKEN=$TWITCH_CLIENT_ACCESS_TOKEN --env ELEVEN_LABS_API_KEY=$ELEVEN_LABS_API_KEY --name bingbot bingbot:latest
+            sudo docker run -d --env DISCORD_API_KEY=$DISCORD_API_KEY --env TTS_COOKIE=$TTS_COOKIE --env TTS_HOST=$TTS_HOST --env REDDIT_CLIENT_ID=$REDDIT_CLIENT_ID --env REDDIT_REFRESH_TOKEN=$REDDIT_REFRESH_TOKEN --env REDDIT_CLIENT_SECRET=$REDDIT_CLIENT_SECRET --env TWITCH_CLIENT_ID=$TWITCH_CLIENT_ID --env TWITCH_CLIENT_ACCESS_TOKEN=$TWITCH_CLIENT_ACCESS_TOKEN --env ELEVEN_LABS_API_KEY=$ELEVEN_LABS_API_KEY --env OPEN_API_KEY=$OPEN_API_KEY --name bingbot bingbot:latest
           '
 
       - name: Remove Github Actions IP from security group

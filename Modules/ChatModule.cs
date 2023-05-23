@@ -1,12 +1,7 @@
 using System.Threading.Tasks;
 using Discord.Interactions;
 using System;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3;
-using OpenAI.GPT3.ObjectModels.RequestModels;
 using System.Collections.Generic;
-using OpenAI.GPT3.ObjectModels;
-using System.Linq;
 using System.IO;
 using Discord;
 
@@ -16,10 +11,12 @@ namespace Bingbot.Modules
     {
         IServiceProvider _provider;
         ElevenLabsTextToSpeechService _ttsService = new();
+        ChatService _chatService;
 
-        public ChatModule(IServiceProvider provider)
+        public ChatModule(IServiceProvider provider, ChatService chatService)
         {
             _provider = provider;
+            _chatService = chatService;
         }
 
         [SlashCommand("ask", "Ask Bingbot", runMode: RunMode.Async)]
@@ -32,36 +29,19 @@ namespace Bingbot.Modules
         {
             await RespondAsync("hmm... lemme think about it");
 
-            var openAiService = new OpenAIService(new OpenAiOptions()
+            string response;
+            try
             {
-                ApiKey = Environment.GetEnvironmentVariable("OPEN_API_KEY")
-            });
-
-            var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
+                response = await _chatService.askBingbotAsync(Context.User, question);
+            }
+            catch (Exception)
             {
-                Messages = new List<ChatMessage>
-                {
-                    ChatMessage.FromSystem("You are a helpful assistant. Your name is Bingbot"),
-                    ChatMessage.FromSystem($"The users name is {Context.User.Username}"),
-                    ChatMessage.FromSystem($"Responses should be concise"),
-                    ChatMessage.FromUser(question)
-                },
-                Model = Models.ChatGpt3_5Turbo,
-                MaxTokens = 200
-            });
-
-            if (!completionResult.Successful)
-            {
-                Console.WriteLine("OpenAI chat completion failed");
-                Console.WriteLine(completionResult.Error.Message);
                 await ModifyOriginalResponseAsync(x =>
                 {
-                    x.Content = "Command failed :(";
+                    x.Content = "Command failed :-(";
                 });
                 return;
             }
-
-            string response = completionResult.Choices.First().Message.Content;
 
             if (respondWithAudio)
             {

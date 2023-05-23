@@ -40,6 +40,7 @@ namespace Bingbot
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<InteractionHandler>()
                 .AddSingleton<AudioChannelManager>()
+                .AddSingleton<ChatService>()
                 .AddSingleton<ElevenLabsTextToSpeechService>()
                 .BuildServiceProvider();
         }

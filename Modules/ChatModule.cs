@@ -58,6 +58,7 @@ namespace Bingbot.Modules
                 {
                     x.Content = "Command failed :(";
                 });
+                return;
             }
 
             string response = completionResult.Choices.First().Message.Content;

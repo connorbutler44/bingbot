@@ -41,7 +41,7 @@ namespace Bingbot
                 Messages = userHistory,
                 Model = Models.ChatGpt3_5Turbo,
                 MaxTokens = 200,
-                Temperature = 1.5f
+                Temperature = 1.0f
             });
 
             if (!completionResult.Successful)

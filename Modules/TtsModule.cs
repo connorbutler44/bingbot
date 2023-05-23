@@ -19,7 +19,7 @@ namespace Bingbot.Modules
         }
 
         [SlashCommand("tts", "ElevenLabs AI Text to Speech", runMode: RunMode.Async)]
-        public async Task JoinChannel(
+        public async Task TextToSpeech(
             [Summary(description: "Voice to be used for tts")]
             [Choice("Obama", "b5EjCnCMCw9XA8W0FFMT"), Choice("Jarrad", "iKfvwsmhoDNziMjUHyUo"),
                 Choice("Asher", "QBaMLEOzUYxyKKh7ZuZN"), Choice("Todd Howard", "8oLT3oOTUp9RV6GHl7AU"),

@@ -56,7 +56,8 @@ namespace Bingbot.Modules
         {
             var client = _audioChannelManager.Get(Context.Guild.Id);
             await RespondAsync("Submitting audio", ephemeral: true);
-            await client.SendAudio(text);
+            var inputStream = await _textToSpeechService.GetTextToSpeechAsync(text, "b5EjCnCMCw9XA8W0FFMT", 90, 90);
+            await client.SendAudio(inputStream);
         }
     }
 }

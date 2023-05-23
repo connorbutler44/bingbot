@@ -1,7 +1,8 @@
-using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Discord.Audio;
+using CliWrap;
+using System.IO;
+using System;
 
 namespace Bingbot
 {
@@ -18,32 +19,34 @@ namespace Bingbot
             _outputStream = outputStream;
         }
 
-        public async Task SendAudio(string path)
+        public async Task SendAudio(Stream inputStream)
         {
-            using (var ffmpeg = CreateStream(Path.GetFullPath(Path.Combine(".", path))))
-            using (var inputStream = ffmpeg.StandardOutput.BaseStream)
-            // using (var outputStream = _audioClient.CreatePCMStream(AudioApplication.Mixed))
+            try
             {
-                try
-                {
-                    await inputStream.CopyToAsync(_outputStream);
-                }
-                finally
-                {
-                    await _outputStream.FlushAsync();
-                }
+                var stream = await WriteToStream(inputStream);
+                await stream.CopyToAsync(_outputStream);
+            }
+            finally
+            {
+                await _outputStream.FlushAsync();
             }
         }
 
-        private Process CreateStream(string path)
+        private async Task<Stream> WriteToStream(Stream inputStream)
         {
-            return Process.Start(new ProcessStartInfo
-            {
-                FileName = "ffmpeg",
-                Arguments = $"-hide_banner -loglevel panic -i {path} -ac 2 -f s16le -ar 48000 pipe:1",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-            });
+            var outputStream = new MemoryStream();
+
+            var result = await Cli.Wrap("ffmpeg")
+                .WithArguments(new[] { "-hide_banner", "-nostats", "-loglevel", "error", "-i", "pipe:", "-ac", "2", "-f", "s16le", "-ar", "48000", "pipe:1" })
+                .WithValidation(CommandResultValidation.None)
+                .WithStandardInputPipe(PipeSource.FromStream(inputStream))
+                .WithStandardOutputPipe(PipeTarget.ToStream(outputStream))
+                .ExecuteAsync();
+
+            outputStream.Position = 0;
+
+            Console.WriteLine(result.ExitCode);
+            return outputStream;
         }
     }
 }

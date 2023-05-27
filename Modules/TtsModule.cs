@@ -42,7 +42,7 @@ namespace Bingbot.Modules
             await ModifyOriginalResponseAsync(x =>
             {
                 x.Attachments = new List<FileAttachment>() { fileAttachment };
-                x.Content = "Here ya go boss";
+                x.Content = " ";
             });
         }
 

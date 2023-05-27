@@ -47,6 +47,22 @@ namespace Bingbot.Modules
                 return;
             }
 
+            var embed = new EmbedBuilder
+            {
+                Color = new Discord.Color(212, 186, 181),
+                Description = $"*{question}*\n\n{response}",
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = Context.User.Username,
+                    IconUrl = Context.User.GetAvatarUrl()
+                },
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = "Bingbot",
+                    IconUrl = "https://cdn.discordapp.com/avatars/980552854500683896/4eb7762a200558b4d86f5f215e7076c6.png"
+                }
+            };
+
             if (respondWithAudio)
             {
                 // TODO make a new voice for bingbot specifically
@@ -56,15 +72,17 @@ namespace Bingbot.Modules
 
                 await ModifyOriginalResponseAsync(x =>
                 {
+                    x.Content = " ";
+                    x.Embed = embed.Build();
                     x.Attachments = new List<FileAttachment>() { fileAttachment };
-                    x.Content = "Here's what I think";
                 });
             }
             else
             {
                 await ModifyOriginalResponseAsync(x =>
                 {
-                    x.Content = response;
+                    x.Content = " ";
+                    x.Embed = embed.Build();
                 });
             }
         }
@@ -100,12 +118,30 @@ namespace Bingbot.Modules
 
             var result = response.Results.FirstOrDefault();
 
+            var embed = new EmbedBuilder
+            {
+                Color = new Discord.Color(212, 186, 181),
+                Description = $"*{prompt}*",
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = Context.User.Username,
+                    IconUrl = Context.User.GetAvatarUrl()
+                },
+                ImageUrl = "attachment://image.png",
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = "Bingbot",
+                    IconUrl = "https://cdn.discordapp.com/avatars/980552854500683896/4eb7762a200558b4d86f5f215e7076c6.png"
+                }
+            };
+
             var fileAttachment = new FileAttachment(new MemoryStream(Convert.FromBase64String(result.B64)), "image.png");
 
             await ModifyOriginalResponseAsync(x =>
             {
-                x.Content = "🎨";
+                x.Content = " ";
                 x.Attachments = new List<FileAttachment> { fileAttachment };
+                x.Embed = embed.Build();
             });
         }
     }

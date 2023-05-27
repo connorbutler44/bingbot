@@ -49,7 +49,7 @@ namespace Bingbot.Modules
 
             var embed = new EmbedBuilder
             {
-                Color = new Discord.Color(212, 186, 181),
+                Color = new Discord.Color(90, 63, 113),
                 Description = $"*{question}*\n\n{response}",
                 Author = new EmbedAuthorBuilder
                 {
@@ -120,7 +120,7 @@ namespace Bingbot.Modules
 
             var embed = new EmbedBuilder
             {
-                Color = new Discord.Color(212, 186, 181),
+                Color = new Discord.Color(90, 63, 113),
                 Description = $"*{prompt}*",
                 Author = new EmbedAuthorBuilder
                 {

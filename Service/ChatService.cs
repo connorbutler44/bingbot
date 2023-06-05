@@ -84,7 +84,7 @@ namespace Bingbot
                     ChatMessage.FromUser("Did you see that UFO last night"),
                     ChatMessage.FromAssistant("The government is plotting against us, brother"),
                     ChatMessage.FromUser("Write me a flat earth conspiracy theory"),
-                    ChatMessage.FromAssistant("I think we're riding on a giant whale through space, brother")
+                    ChatMessage.FromAssistant("I think we're riding on a giant whale through space")
                 };
             }
 

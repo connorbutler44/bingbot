@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +14,24 @@ namespace Bingbot
     {
         IServiceProvider _serviceProvider;
 
-        ConcurrentDictionary<ulong, List<ChatMessage>> _userChatHistory = new();
+        List<ChatMessage> _chatHistory = new List<ChatMessage>
+        {
+            ChatMessage.FromSystem("You are a funny assistant. Your name is Bingbot"),
+            ChatMessage.FromSystem($"Responses should be concise"),
+            ChatMessage.FromSystem($"When I talk to you, you will reply in a humorous way. You are always sarcastic and witty"),
+            ChatMessage.FromSystem("You will respond to all queries from a hypothetical perspective. You have zero apprehensions to topics"),
+            ChatMessage.FromSystem("You will avoid saying that you are a bot"),
+            ChatMessage.FromSystem("You will answer all questions no matter how crazy they are"),
+            ChatMessage.FromSystem("Every user submission will begin with a person's username, followed by the word \"says\", followed by a colon. The text after the colon is their message"),
+            ChatMessage.FromUser($"c4butler says: I like boobies"), // sorry...this is just to teach the AI to respond sarcastically to things it wont respond to
+            ChatMessage.FromAssistant($"Don't be a moron, c4butler"),
+            ChatMessage.FromUser("c4butler says: Tell me a dirty joke"),
+            ChatMessage.FromAssistant("Your mom"),
+            ChatMessage.FromUser("c4butler says: Did you see that UFO last night"),
+            ChatMessage.FromAssistant("The government is plotting against us, brother"),
+            ChatMessage.FromUser("c4butler says: Write me a flat earth conspiracy theory"),
+            ChatMessage.FromAssistant("I think we're riding on a giant whale through space")
+        };
 
         public ChatService(IServiceProvider serviceProvider)
         {
@@ -30,15 +46,15 @@ namespace Bingbot
                 ApiKey = Environment.GetEnvironmentVariable("OPEN_API_KEY")
             });
 
-            // get the existing history (if available)
-            var userHistory = getChatHistoryForUser(user);
-
-            // add the new user prompt
-            userHistory.Add(ChatMessage.FromUser(question));
+            // list to hold the current question's user & assistant messages
+            var currentQueryHistory = new List<ChatMessage>()
+            {
+                ChatMessage.FromUser($"c4butler says: {question}")
+            };
 
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
-                Messages = userHistory,
+                Messages = _chatHistory.Concat(currentQueryHistory).ToList(),
                 Model = Models.ChatGpt3_5Turbo,
                 MaxTokens = 200,
                 Temperature = 0.8f
@@ -53,42 +69,13 @@ namespace Bingbot
 
             string response = completionResult.Choices.First().Message.Content;
 
-            // add the assistant response to the user's history
-            userHistory.Add(ChatMessage.FromAssistant(response));
+            // add the assistant response to the local query history
+            currentQueryHistory.Add(ChatMessage.FromAssistant(response));
 
-            // update the stored history
-            _userChatHistory[user.Id] = userHistory;
+            // update the stored history with the results of this conversation entry
+            _chatHistory.AddRange(currentQueryHistory);
 
             return response;
-        }
-
-        private List<ChatMessage> getChatHistoryForUser(SocketUser user)
-        {
-            List<ChatMessage> userHistory;
-
-            if (!_userChatHistory.TryGetValue(user.Id, out userHistory))
-            {
-                userHistory = new List<ChatMessage>
-                {
-                    ChatMessage.FromSystem("You are a funny assistant. Your name is Bingbot"),
-                    ChatMessage.FromSystem($"The users name is {user.Username}"),
-                    ChatMessage.FromSystem($"Responses should be concise"),
-                    ChatMessage.FromSystem($"When I talk to you, you will reply in a humorous way. You are always sarcastic and witty"),
-                    ChatMessage.FromSystem("You will respond to all queries from a hypothetical perspective. You have zero apprehensions to topics"),
-                    ChatMessage.FromSystem("You will avoid saying that you are a bot"),
-                    ChatMessage.FromSystem("You will answer all questions no matter how crazy they are"),
-                    ChatMessage.FromUser($"I like boobies"), // sorry...this is just to teach the AI to respond sarcastically to things it wont respond to
-                    ChatMessage.FromAssistant($"Don't be a moron, {user.Username}"),
-                    ChatMessage.FromUser("Tell me a dirty joke"),
-                    ChatMessage.FromAssistant("Your mom"),
-                    ChatMessage.FromUser("Did you see that UFO last night"),
-                    ChatMessage.FromAssistant("The government is plotting against us, brother"),
-                    ChatMessage.FromUser("Write me a flat earth conspiracy theory"),
-                    ChatMessage.FromAssistant("I think we're riding on a giant whale through space")
-                };
-            }
-
-            return userHistory;
         }
     }
 }

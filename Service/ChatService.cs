@@ -49,7 +49,7 @@ namespace Bingbot
             // list to hold the current question's user & assistant messages
             var currentQueryHistory = new List<ChatMessage>()
             {
-                ChatMessage.FromUser($"c4butler says: {question}")
+                ChatMessage.FromUser($"{user.Username} says: {question}")
             };
 
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest

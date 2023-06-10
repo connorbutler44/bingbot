@@ -12,6 +12,9 @@ jobs:
         with:
           lfs: 'true'
 
+      - name: Checkout LFS objects
+        run: git lfs checkout
+
       - name: Get Github action IP
         id: ip
         uses: haythem/public-ip@v1.2

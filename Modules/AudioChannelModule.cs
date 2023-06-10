@@ -51,12 +51,31 @@ namespace Bingbot.Modules
             }
         }
 
-        [SlashCommand("send-audio", "Send audio", runMode: RunMode.Async)]
-        public async Task SendAudio(string text)
+        [SlashCommand("send-audio", "Send audio to voice channel", runMode: RunMode.Async)]
+        public async Task SendAudio(
+            [Summary(description: "Voice to be used for tts")]
+            [Choice("Obama", "b5EjCnCMCw9XA8W0FFMT"), Choice("Jarrad", "iKfvwsmhoDNziMjUHyUo"),
+                Choice("Asher", "QBaMLEOzUYxyKKh7ZuZN"), Choice("Todd Howard", "8oLT3oOTUp9RV6GHl7AU"),
+                Choice("Whopper", "Zuzo46BJSET6252mCZX5"), Choice("Tim Gunn", "lQV6YBaetZO5fb2n1JSV"),
+                Choice("Halo Announcer", "2mY0k5zCDvLApJhuUvS4"), Choice("Cortana", "G5JvFs8Ivxbn4PsafONN"),
+                Choice("Chills", "XmxA2cgmSD8ydzjAjP7G"), Choice("Oblivion Guard", "S4MX3ES8njsedM3zBZhJ")] string voice,
+            [Summary(description: "Text to be used for tts")]
+            string text,
+            [Summary(description: "0-100. Higher values: consistency + monotonality. Lower values: More expressive + instability.")]
+            int? stability = null,
+            [Summary(description: "0-100. Higher values for better clarity but could cause artifacting. Lower if artifacts is present.")]
+            int? clarity = null)
         {
-            var client = _audioChannelManager.Get(Context.Guild.Id);
+            var client = _audioChannelManager.TryGet(Context.Guild.Id);
+
+            if (client == null)
+            {
+                await RespondAsync("Bingbot must be in a voice channel to send audio", ephemeral: true);
+                return;
+            }
+
             await RespondAsync("Submitting audio", ephemeral: true);
-            var inputStream = await _textToSpeechService.GetTextToSpeechAsync(text, "b5EjCnCMCw9XA8W0FFMT", 90, 90);
+            var inputStream = await _textToSpeechService.GetTextToSpeechAsync(text, voice, stability, clarity);
             await client.SendAudio(inputStream);
         }
     }

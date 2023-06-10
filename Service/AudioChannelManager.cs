@@ -30,9 +30,13 @@ namespace Bingbot
             return audioPlayer;
         }
 
-        public AudioPlayer Get(ulong guildID)
+        public AudioPlayer TryGet(ulong guildID)
         {
-            return _audioClients[guildID];
+            AudioPlayer audioPlayer;
+
+            _audioClients.TryGetValue(guildID, out audioPlayer);
+
+            return audioPlayer;
         }
     }
 }

@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Discord.Audio;
 using CliWrap;
 using System.IO;
-using System;
 
 namespace Bingbot
 {
@@ -36,7 +35,7 @@ namespace Bingbot
         {
             var outputStream = new MemoryStream();
 
-            var result = await Cli.Wrap("ffmpeg")
+            var result = await Cli.Wrap("Command/ffmpeg")
                 .WithArguments(new[] { "-hide_banner", "-nostats", "-loglevel", "error", "-i", "pipe:", "-ac", "2", "-f", "s16le", "-ar", "48000", "pipe:1" })
                 .WithValidation(CommandResultValidation.None)
                 .WithStandardInputPipe(PipeSource.FromStream(inputStream))
@@ -45,7 +44,6 @@ namespace Bingbot
 
             outputStream.Position = 0;
 
-            Console.WriteLine(result.ExitCode);
             return outputStream;
         }
     }

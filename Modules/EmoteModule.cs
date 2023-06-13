@@ -36,14 +36,14 @@ namespace Bingbot.Modules
         {
             if (!Emote.TryParse(emote, out var parsedEmote))
             {
-                await RespondAsync("Failed to parse input");
+                await RespondAsync("Failed to parse input", ephemeral: true);
                 return;
             }
 
             // make sure we're downloading from an allowed CDN
             if (!UrlUtil.UrlMatchesDomainAndSubdomain(parsedEmote.Url, allowedCdns))
             {
-                await RespondAsync("Invalid Url or domain/subdomain isn't allowed homie");
+                await RespondAsync("Invalid Url or domain/subdomain isn't allowed homie", ephemeral: true);
                 return;
             }
 
@@ -52,7 +52,7 @@ namespace Bingbot.Modules
 
             if (!response.IsSuccessStatusCode)
             {
-                await RespondAsync("Failed to download image");
+                await RespondAsync("Failed to download image", ephemeral: true);
                 return;
             }
 
@@ -75,7 +75,7 @@ namespace Bingbot.Modules
             // make sure we're downloading from an allowed CDN
             if (!UrlUtil.UrlMatchesDomainAndSubdomain(url, allowedCdns))
             {
-                await RespondAsync("Invalid Url or domain/subdomain isn't allowed homie");
+                await RespondAsync("Invalid Url or domain/subdomain isn't allowed homie", ephemeral: true);
                 return;
             }
 
@@ -84,7 +84,7 @@ namespace Bingbot.Modules
 
             if (!response.IsSuccessStatusCode)
             {
-                await RespondAsync("Failed to download image");
+                await RespondAsync("Failed to download image", ephemeral: true);
                 return;
             }
 

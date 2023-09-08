@@ -14,7 +14,7 @@ namespace Bingbot
     {
         IServiceProvider _serviceProvider;
 
-        List<ChatMessage> _chatHistory = new List<ChatMessage>
+        public static List<ChatMessage> _baseHistory = new List<ChatMessage>
         {
             ChatMessage.FromSystem("You are a funny assistant. Your name is Bingbot"),
             ChatMessage.FromSystem($"Responses should be concise"),
@@ -32,6 +32,8 @@ namespace Bingbot
             ChatMessage.FromUser("c4butler says: Write me a flat earth conspiracy theory"),
             ChatMessage.FromAssistant("I think we're riding on a giant whale through space")
         };
+
+        List<ChatMessage> _chatHistory = _baseHistory.ToList();
 
         public ChatService(IServiceProvider serviceProvider)
         {
@@ -62,9 +64,39 @@ namespace Bingbot
 
             if (!completionResult.Successful)
             {
-                Console.WriteLine("OpenAI chat completion failed");
-                Console.WriteLine(completionResult.Error.Message);
-                throw new Exception(completionResult.Error.Message);
+                if (completionResult.Error.Code == "context_length_exceeded")
+                {
+                    Console.WriteLine("Chat completion context length exceeded. Clearing some history");
+
+                    // find index of first non-baseline context message
+                    int nonBaseHistoryStartIndex = _baseHistory.Count;
+                    // how many messages have been sent (excluding baseline messages)
+                    int nonBaseHistoryLength = _chatHistory.Count - _baseHistory.Count;
+
+                    // remove half of the user-asked messages from history so we can re-run the completion
+                    // int division is ok cause I don't really care about the precision of what's removed - just need more tokens!
+                    _chatHistory.RemoveRange(nonBaseHistoryStartIndex, nonBaseHistoryLength / 2);
+
+                    try
+                    {
+                        // re-try completion
+                        // TODO: nested return like this is gross but don't want to refactor this fn right now.
+                        // Also this could potentially just infinitely recurse if the token length on the request
+                        // is just too big but can be handled later too c:
+                        return await askBingbotAsync(user, question);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("OpenAI chat completion failed after clearing completion context.");
+                        throw new Exception(e.Message);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("OpenAI chat completion failed");
+                    Console.WriteLine(completionResult.Error.Code, completionResult.Error.Message);
+                    throw new Exception(completionResult.Error.Message);
+                }
             }
 
             string response = completionResult.Choices.First().Message.Content;

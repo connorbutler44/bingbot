@@ -76,19 +76,24 @@ namespace Bingbot
 
         private async Task EmbedRedditVideo(RedditPostDataChildrenData post, IMessage message)
         {
-            var outputStream = new MemoryStream();
+            var tempFilename = Guid.NewGuid() + ".mp4";
 
-            // Hls_Url contains the m3u8 playlist for the audio.Fallback_Url is for the video
+            // Hls_Url contains the m3u8 playlist for the audio. Fallback_Url is for the video
             // use ffmpeg to combine the two sources into one output
             await Cli.Wrap("ffmpeg")
-                .WithArguments(new[] { "-hide_banner", "-nostats", "-loglevel", "error", "-i", post.Media.Reddit_Video.Hls_Url, "-i", post.Media.Reddit_Video.Fallback_Url, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", "-map", "1:v:0", "-map", "0:a:0", "-f", "matroska", "pipe:1" })
+                .WithArguments(new[] { "-hide_banner", "-nostats", "-loglevel", "error", "-i", post.Media.Reddit_Video.Hls_Url, "-i", post.Media.Reddit_Video.Fallback_Url, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", "-map", "1:v:0", "-map", "0:a:0", tempFilename })
                 .WithValidation(CommandResultValidation.None)
-                .WithStandardOutputPipe(PipeTarget.ToStream(outputStream))
                 .ExecuteAsync();
 
-            var fileAttachment = new FileAttachment(stream: outputStream, fileName: "media.mp4");
+            var fileAttachment = new FileAttachment(tempFilename, fileName: "media.mp4");
 
             await message.Channel.SendFileAsync(attachment: fileAttachment, messageReference: new MessageReference(message.Id));
+
+            // cleanup file
+            if (File.Exists(tempFilename))
+            {
+                File.Delete(tempFilename);
+            }
         }
     }
 }

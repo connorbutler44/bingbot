@@ -17,7 +17,7 @@ namespace Bingbot
         private readonly IConfiguration _configuration;
         private readonly DiscordSocketConfig _socketConfig = new()
         {
-            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
+            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
             AlwaysDownloadUsers = true,
         };
 
@@ -40,6 +40,7 @@ namespace Bingbot
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<InteractionHandler>()
                 .AddSingleton<AudioChannelManager>()
+                .AddSingleton<MessageHandler>()
                 .AddSingleton<ChatService>()
                 .AddSingleton<ElevenLabsTextToSpeechService>()
                 .BuildServiceProvider();
@@ -65,7 +66,6 @@ namespace Bingbot
 
         private Task LogAsync(LogMessage log)
         {
-            Console.WriteLine(log.ToString());
             return Task.CompletedTask;
         }
     }

@@ -1,3 +1,4 @@
+using Bingbot;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -14,13 +15,15 @@ namespace InteractionFramework
         private readonly InteractionService _handler;
         private readonly IServiceProvider _services;
         private readonly IConfiguration _configuration;
+        private readonly MessageHandler _messageHandler;
 
-        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration config)
+        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration config, MessageHandler messageHandler)
         {
             _client = client;
             _handler = handler;
             _services = services;
             _configuration = config;
+            _messageHandler = messageHandler;
         }
 
         public async Task InitializeAsync()
@@ -34,6 +37,9 @@ namespace InteractionFramework
 
             // Process the InteractionCreated payloads to execute Interactions commands
             _client.InteractionCreated += HandleInteraction;
+
+            // Process all incoming messages for various use-cases
+            _client.MessageReceived += _messageHandler.ProcessMessage;
         }
 
         private Task LogAsync(LogMessage log)

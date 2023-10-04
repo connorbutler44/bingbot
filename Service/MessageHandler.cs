@@ -27,7 +27,7 @@ namespace Bingbot
             MatchCollection urlMatches = Regex.Matches(message.Content, @"\b(?:https?:\/\/|www\.)\S+\b");
 
             if (
-                message.Channel.Id == 980586815046180864 &&
+                message.Channel.Id == 905417457232142366 &&
                 message.Author.Id == 310249048844271628 &&
                 message.Author.ActiveClients.Any(p => p.ToString() == "Mobile"))
             {

@@ -31,7 +31,8 @@ namespace Bingbot
                 message.Author.Id == 310249048844271628 &&
                 message.Author.ActiveClients.Any(p => p.ToString() == "Mobile"))
             {
-                await message.AddReactionAsync(new Emoji("<:ICANT:1143297524396990595>"));
+                var emote = Emote.Parse("<:ICANT:1143297524396990595>");
+                await message.AddReactionAsync(emote);
             }
 
             foreach (Match match in urlMatches)

@@ -26,6 +26,14 @@ namespace Bingbot
             // find any links in the message content
             MatchCollection urlMatches = Regex.Matches(message.Content, @"\b(?:https?:\/\/|www\.)\S+\b");
 
+            if (
+                message.Channel.Id == 980586815046180864 &&
+                message.Author.Id == 310249048844271628 &&
+                message.Author.ActiveClients.Any(p => p.ToString() == "Mobile"))
+            {
+                await message.AddReactionAsync(new Emoji("<:ICANT:1143297524396990595>"));
+            }
+
             foreach (Match match in urlMatches)
             {
                 // check if the provided link is in our whitelist to process

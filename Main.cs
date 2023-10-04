@@ -17,7 +17,7 @@ namespace Bingbot
         private readonly IConfiguration _configuration;
         private readonly DiscordSocketConfig _socketConfig = new()
         {
-            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
+            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent | GatewayIntents.GuildPresences,
             AlwaysDownloadUsers = true,
         };
 

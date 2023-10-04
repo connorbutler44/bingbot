@@ -1,10 +1,6 @@
 using System.Threading.Tasks;
-using Discord;
 using Discord.Interactions;
 using System;
-using System.Text.RegularExpressions;
-using System.IO;
-using System.Collections.Generic;
 
 namespace Bingbot.Modules
 {

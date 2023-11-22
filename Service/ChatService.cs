@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
-using OpenAI.GPT3;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3.ObjectModels;
-using OpenAI.GPT3.ObjectModels.RequestModels;
+using OpenAI;
+using OpenAI.Managers;
+using OpenAI.ObjectModels;
+using OpenAI.ObjectModels.RequestModels;
 
 namespace Bingbot
 {
@@ -57,7 +57,7 @@ namespace Bingbot
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
                 Messages = _chatHistory.Concat(currentQueryHistory).ToList(),
-                Model = Models.ChatGpt3_5Turbo,
+                Model = Models.Gpt_4_1106_preview,
                 MaxTokens = 200,
                 Temperature = 0.8f
             });

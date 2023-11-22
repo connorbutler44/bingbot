@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Discord;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3;
-using OpenAI.GPT3.ObjectModels.RequestModels;
+using OpenAI.Managers;
+using OpenAI;
+using OpenAI.ObjectModels.RequestModels;
 using System.Linq;
+using OpenAI.ObjectModels;
 
 namespace Bingbot.Modules
 {
@@ -101,9 +102,10 @@ namespace Bingbot.Modules
 
             var response = await openAiService.CreateImage(new ImageCreateRequest
             {
-                Size = "512x512",
+                Size = StaticValues.ImageStatics.Size.Size1024,
                 Prompt = prompt,
-                ResponseFormat = "b64_json"
+                ResponseFormat = "b64_json",
+                Model = Models.Dall_e_3
             });
 
             if (!response.Successful)

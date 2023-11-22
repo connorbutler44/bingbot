@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="CliWrap" Version="3.6.0" />
-    <PackageReference Include="Betalgo.OpenAI" Version="6.8.6" />
+    <PackageReference Include="Betalgo.OpenAI" Version="7.4.1" />
     <PackageReference Include="libsodium" Version="1.0.18.4" />
   </ItemGroup>
 </Project>

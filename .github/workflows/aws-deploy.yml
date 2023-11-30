@@ -55,12 +55,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           
             cd /tmp/ &&
-            sudo docker stop bingbot &&
-            sudo docker rm bingbot || true &&
-            sudo docker rmi bingbot:latest || true &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
-            sudo docker compose -f ./ops/docker-compose.yml up -d
+            sudo docker compose -f /home/ubuntu/ops/docker-compose.yml up -d &&
+            docker images prune --all
           '
 
       - name: Remove Github Actions IP from security group

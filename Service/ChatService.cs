@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Managers;
 using OpenAI.ObjectModels;
@@ -13,6 +14,7 @@ namespace Bingbot
     public class ChatService
     {
         IServiceProvider _serviceProvider;
+        IConfiguration _config;
 
         public static List<ChatMessage> _baseHistory = new List<ChatMessage>
         {
@@ -35,9 +37,10 @@ namespace Bingbot
 
         List<ChatMessage> _chatHistory = _baseHistory.ToList();
 
-        public ChatService(IServiceProvider serviceProvider)
+        public ChatService(IServiceProvider serviceProvider, IConfiguration config)
         {
             _serviceProvider = serviceProvider;
+            _config = config;
         }
 
         // known issue here if the user does two prompts at a similar time it could overwite part of the logs
@@ -45,7 +48,7 @@ namespace Bingbot
         {
             var openAiService = new OpenAIService(new OpenAiOptions()
             {
-                ApiKey = Environment.GetEnvironmentVariable("OPEN_API_KEY")
+                ApiKey = _config["OPENAI_API_KEY"]
             });
 
             // list to hold the current question's user & assistant messages

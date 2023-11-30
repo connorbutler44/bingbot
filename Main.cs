@@ -30,7 +30,7 @@ namespace Bingbot
         public Program()
         {
             _configuration = new ConfigurationBuilder()
-                // .AddJsonFile("./appsettings.json", optional: false)
+                .AddEnvironmentVariables("BINGBOT_")
                 .Build();
 
             _services = new ServiceCollection()
@@ -43,6 +43,7 @@ namespace Bingbot
                 .AddSingleton<MessageHandler>()
                 .AddSingleton<ChatService>()
                 .AddSingleton<ElevenLabsTextToSpeechService>()
+                .AddDbContext<DataContext>()
                 .BuildServiceProvider();
         }
 
@@ -55,7 +56,7 @@ namespace Bingbot
             await _services.GetRequiredService<InteractionHandler>()
                 .InitializeAsync();
 
-            string apiKey = Environment.GetEnvironmentVariable("DISCORD_API_KEY");
+            string apiKey = _configuration["DISCORD_API_KEY"];
 
             await client.LoginAsync(TokenType.Bot, apiKey);
             await client.StartAsync();

@@ -7,11 +7,12 @@ namespace Bingbot.Modules
     public class DumbModule : InteractionModuleBase<SocketInteractionContext>
     {
         IServiceProvider _provider;
-        ElevenLabsTextToSpeechService _ttsService = new();
+        ElevenLabsTextToSpeechService _ttsService;
 
-        public DumbModule(IServiceProvider provider)
+        public DumbModule(IServiceProvider provider, ElevenLabsTextToSpeechService ttsService)
         {
             _provider = provider;
+            _ttsService = ttsService;
         }
 
         [SlashCommand("givecookie", "Give Bingbot a Cookie", runMode: RunMode.Async)]

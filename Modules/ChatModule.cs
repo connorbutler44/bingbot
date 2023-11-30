@@ -9,19 +9,23 @@ using OpenAI;
 using OpenAI.ObjectModels.RequestModels;
 using System.Linq;
 using OpenAI.ObjectModels;
+using Microsoft.Extensions.Configuration;
 
 namespace Bingbot.Modules
 {
     public class ChatModule : InteractionModuleBase<SocketInteractionContext>
     {
         IServiceProvider _provider;
-        ElevenLabsTextToSpeechService _ttsService = new();
+        IConfiguration _config;
+        ElevenLabsTextToSpeechService _ttsService;
         ChatService _chatService;
 
-        public ChatModule(IServiceProvider provider, ChatService chatService)
+        public ChatModule(IServiceProvider provider, IConfiguration config, ChatService chatService, ElevenLabsTextToSpeechService ttsService)
         {
             _provider = provider;
             _chatService = chatService;
+            _config = config;
+            _ttsService = ttsService;
         }
 
         [SlashCommand("ask", "Ask Bingbot", runMode: RunMode.Async)]
@@ -97,7 +101,7 @@ namespace Bingbot.Modules
             await RespondAsync("Gathering my art supplies...");
             var openAiService = new OpenAIService(new OpenAiOptions()
             {
-                ApiKey = Environment.GetEnvironmentVariable("OPEN_API_KEY")
+                ApiKey = _config["OPENAI_API_KEY"]
             });
 
             var response = await openAiService.CreateImage(new ImageCreateRequest

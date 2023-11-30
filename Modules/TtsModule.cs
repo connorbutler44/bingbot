@@ -11,11 +11,12 @@ namespace Bingbot.Modules
     public class TtsModule : InteractionModuleBase<SocketInteractionContext>
     {
         IServiceProvider _provider;
-        ElevenLabsTextToSpeechService _ttsService = new();
+        ElevenLabsTextToSpeechService _ttsService;
 
-        public TtsModule(IServiceProvider provider)
+        public TtsModule(IServiceProvider provider, ElevenLabsTextToSpeechService ttsService)
         {
             _provider = provider;
+            _ttsService = ttsService;
         }
 
         [SlashCommand("tts", "ElevenLabs AI Text to Speech", runMode: RunMode.Async)]

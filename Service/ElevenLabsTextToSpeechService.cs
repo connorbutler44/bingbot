@@ -3,12 +3,20 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.IO;
 using System.Net.Http.Json;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Bingbot
 {
     public class ElevenLabsTextToSpeechService : ITextToSpeechService
     {
+        IConfiguration _config;
         private readonly HttpClient client = new HttpClient();
+
+        public ElevenLabsTextToSpeechService(IConfiguration config)
+        {
+            _config = config;
+        }
 
         public Task<Stream> GetTextToSpeechAsync(string message, string voice, int? stability, int? clarity)
         {
@@ -17,7 +25,7 @@ namespace Bingbot
 
         private async Task<Stream> GenerateMp3Segment(string message, string speaker, int? stability, int? clarity)
         {
-            string apiKey = Environment.GetEnvironmentVariable("ELEVEN_LABS_API_KEY");
+            string apiKey = _config["ELEVEN_LABS_API_KEY"];
             string url = $"https://api.elevenlabs.io/v1/text-to-speech/{speaker}";
 
             var request = new HttpRequestMessage(HttpMethod.Post, url);

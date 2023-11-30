@@ -19,9 +19,12 @@ The interaction framework handles automatically creating/updating/deleting comma
 ## Environment Variables
 | Key                 | Description                                      |
 | ------------------- | ------------------------------------------------ |
-| DISCORD_API_KEY     | API key for your discord application (if you don't already have a bot application, follow at least step 1 [https://discord.com/developers/docs/getting-started](here))            |
-| ELEVEN_LABS_API_KEY | API key for the ElevenLabs Text-to-Speech API    |
-| OPEN_API_KEY        | OpenAPI key for GPT & Dall-E 3                   |
+| BINGBOT_DISCORD_API_KEY     | API key for your discord application (if you don't already have a bot application, follow at least step 1 [https://discord.com/developers/docs/getting-started](here))            |
+| BINGBOT_ELEVEN_LABS_API_KEY | API key for the ElevenLabs Text-to-Speech API    |
+| BINGBOT_OPENAI_API_KEY        | OpenAPI key for GPT & Dall-E 3                   |
+| BINGBOT_POSTGRES_CONNECTION_STRING | Connection string for postgres - https://www.npgsql.org/doc/connection-string-parameters.html |
+
+*note:* `BINGBOT_` is stripped by the configuration builder prior to usage in the app
 
 ## Bot Permissions
 If you don't want to give the bot administrator permission, you will need to use (at least) the following permission set for the bot to be able to use the full suite of features

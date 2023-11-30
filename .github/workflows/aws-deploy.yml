@@ -67,7 +67,7 @@ jobs:
             sudo docker rmi bingbot:latest || true &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
-            sudo docker compose up -d
+            sudo docker compose -f ./ops/docker-compose.yml up -d
           '
 
       - name: Remove Github Actions IP from security group

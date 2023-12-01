@@ -48,14 +48,20 @@ namespace Bingbot.Modules
                     .ToListAsync()
             ).Count;
 
-            // number of logs for this user this week
             var startOfWeek = DateTimeOffset.Now.AddDays(-(int)DateTimeOffset.Now.DayOfWeek + (int)DayOfWeek.Monday).UtcDateTime;
 
-            var thisWeekTotal = (
-                await _db.UserLogs
-                    .Where(x => x.TakenAt >= startOfWeek && x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
-                    .ToListAsync()
-            ).Count;
+            // get all logs for this week, grouped by user
+            var userCountsThisWeek = await _db.UserLogs
+                .Where(x => x.TakenAt >= startOfWeek && x.GuildId == Context.Guild.Id)
+                .GroupBy(x => x.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            // total number of logs for this user this week
+            var thisWeekTotal = userCountsThisWeek.FirstOrDefault(x => x.UserId == Context.User.Id)?.Count ?? 0;
+            // rank of this user this week amongst others in this guild
+            var currentUserRank = userCountsThisWeek.FindIndex(x => x.UserId == Context.User.Id) + 1;
 
             // most logs in a singular day
             var mostInDay = (
@@ -75,22 +81,34 @@ namespace Bingbot.Modules
                 {
                     new EmbedFieldBuilder
                     {
-                        Name = "Total",
-                        Value = total,
+                        Name = "This week rank",
+                        Value = $"#{currentUserRank}",
                         IsInline = true
                     },
                     new EmbedFieldBuilder
                     {
-                        Name = "This week",
+                        Name = "This week total",
                         Value = thisWeekTotal,
                         IsInline = true
                     },
                     new EmbedFieldBuilder
                     {
-                        Name = "Most in a day",
+                        Name = "\u200b",
+                        Value = "\u200b",
+                        IsInline = false
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Most in a day (lifetime)",
                         Value = mostInDay,
                         IsInline = true
-                    }
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Total (lifetime)",
+                        Value = total,
+                        IsInline = true
+                    },
                 },
             };
 

@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Discord;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace Bingbot.Modules
 {
@@ -61,7 +62,7 @@ namespace Bingbot.Modules
             // total number of logs for this user this week
             var thisWeekTotal = userCountsThisWeek.FirstOrDefault(x => x.UserId == Context.User.Id)?.Count ?? 0;
             // rank of this user this week amongst others in this guild
-            var currentUserRank = userCountsThisWeek.FindIndex(x => x.UserId == Context.User.Id) + 1;
+            var currentUserRank = userCountsThisWeek.FindIndex(x => x.UserId == Context.User.Id);
 
             // most logs in a singular day
             var mostInDay = (
@@ -71,7 +72,14 @@ namespace Bingbot.Modules
                     .Select(x => new { Date = x.Key, Count = x.Count() })
                     .OrderByDescending(x => x.Count)
                     .FirstOrDefaultAsync()
-            ).Count;
+            )?.Count ?? 0;
+
+            var rankingText = currentUserRank switch
+            {
+                -1 => "n/a",
+                0 => "👑",
+                _ => $"#{currentUserRank + 1}"
+            };
 
             var embed = new EmbedBuilder
             {
@@ -82,7 +90,7 @@ namespace Bingbot.Modules
                     new EmbedFieldBuilder
                     {
                         Name = "This week rank",
-                        Value = $"#{currentUserRank}",
+                        Value = rankingText,
                         IsInline = true
                     },
                     new EmbedFieldBuilder

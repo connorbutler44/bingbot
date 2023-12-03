@@ -60,7 +60,7 @@ namespace Bingbot
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
                 Messages = _chatHistory.Concat(currentQueryHistory).ToList(),
-                Model = Models.Gpt_4_1106_preview,
+                Model = Models.Gpt_3_5_Turbo_1106,
                 MaxTokens = 200,
                 Temperature = 0.8f
             });

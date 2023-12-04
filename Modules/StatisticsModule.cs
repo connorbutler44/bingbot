@@ -49,7 +49,7 @@ namespace Bingbot.Modules
                     .ToListAsync()
             ).Count;
 
-            var startOfWeek = DateTimeOffset.Now.AddDays(-(int)DateTimeOffset.Now.DayOfWeek + (int)DayOfWeek.Monday).UtcDateTime;
+            var startOfWeek = DateTimeOffset.Now.AddDays(-(int)DateTimeOffset.Now.DayOfWeek).UtcDateTime.Date;
 
             // get all logs for this week, grouped by user
             var userCountsThisWeek = await _db.UserLogs

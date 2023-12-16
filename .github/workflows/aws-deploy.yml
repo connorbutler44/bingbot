@@ -57,7 +57,7 @@ jobs:
             cd /tmp/ &&
             sudo docker load -i bingbot.tar.gz &&
             sudo rm bingbot.tar.gz &&
-            sudo docker compose -f /home/ec2-user/docker-compose.yml up -d &&
+            sudo docker-compose -f /home/ec2-user/docker-compose.yml up -d &&
             sudo docker image prune -a -f
           '
 

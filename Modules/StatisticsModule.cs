@@ -137,8 +137,6 @@ namespace Bingbot.Modules
 
             var leaderboard = new List<string>();
 
-            var emote = Emote.Parse("<:pooking:1190005101046288485>");
-
             for (int i = 0; i < userCountsThisWeek.Count; i++)
             {
                 var user = Context.Guild.GetUser(userCountsThisWeek[i].UserId);
@@ -146,7 +144,7 @@ namespace Bingbot.Modules
 
                 var placementText = i switch
                 {
-                    0 => emote,
+                    0 => "<:pooking:1190005101046288485>",
                     _ => $"{i + 1}."
                 };
 

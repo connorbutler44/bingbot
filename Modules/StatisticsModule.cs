@@ -77,7 +77,7 @@ namespace Bingbot.Modules
             var rankingText = currentUserRank switch
             {
                 -1 => "n/a",
-                0 => "👑",
+                0 => "<:pooking:1190005101046288485>",
                 _ => $"#{currentUserRank + 1}"
             };
 

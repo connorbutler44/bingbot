@@ -49,7 +49,7 @@ namespace Bingbot.Modules
                     .ToListAsync()
             ).Count;
 
-            var startOfWeek = DateTimeOffset.Now.AddDays(-(int)DateTimeOffset.Now.DayOfWeek).UtcDateTime.Date;
+            var startOfWeek = GetStartOfWeek();
 
             // get all logs for this week, grouped by user
             var userCountsThisWeek = await _db.UserLogs
@@ -121,6 +121,57 @@ namespace Bingbot.Modules
             };
 
             await RespondAsync(embed: embed.Build());
+        }
+
+        [SlashCommand("leaderboard", "💩 weekly leaderboard", runMode: RunMode.Async)]
+        public async Task Leaderboard()
+        {
+            var startOfWeek = GetStartOfWeek();
+
+            var userCountsThisWeek = await _db.UserLogs
+                .Where(x => x.TakenAt >= startOfWeek && x.GuildId == Context.Guild.Id)
+                .GroupBy(x => x.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            var leaderboard = new List<string>();
+
+            for (int i = 0; i < userCountsThisWeek.Count; i++)
+            {
+                var user = Context.Guild.GetUser(userCountsThisWeek[i].UserId);
+                if (user == null) continue;
+
+                var placementText = i switch
+                {
+                    0 => "👑",
+                    _ => $"{i + 1}."
+                };
+
+                leaderboard.Add($"{placementText} {user.Username} - {userCountsThisWeek[i].Count}");
+            }
+
+            if (leaderboard.Count == 0)
+            {
+                await RespondAsync("No logs this week!");
+            }
+
+
+            var embed = new EmbedBuilder
+            {
+                Color = new Color(191, 105, 82),
+                Title = $"💩 weekly leaderboard",
+                Description = string.Join("\n", leaderboard),
+            };
+
+            await RespondAsync(embed: embed.Build());
+        }
+
+
+
+        private DateTimeOffset GetStartOfWeek()
+        {
+            return DateTimeOffset.Now.AddDays(-(int)DateTimeOffset.Now.DayOfWeek).UtcDateTime.Date;
         }
     }
 }

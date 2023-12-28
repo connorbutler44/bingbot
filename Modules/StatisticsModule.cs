@@ -148,7 +148,7 @@ namespace Bingbot.Modules
                     _ => $"{i + 1}."
                 };
 
-                leaderboard.Add($"{placementText} {user.Username} - {userCountsThisWeek[i].Count}");
+                leaderboard.Add($"{placementText} **{user.Username}** - {userCountsThisWeek[i].Count}");
             }
 
             if (leaderboard.Count == 0)

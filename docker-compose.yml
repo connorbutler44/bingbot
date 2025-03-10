@@ -1,0 +1,27 @@
+services:
+  bingbot:
+    image: bingbot:latest
+    platform: linux/arm64
+    environment:
+      - BINGBOT_DISCORD_API_KEY=${BINGBOT_DISCORD_API_KEY}
+      - BINGBOT_ELEVEN_LABS_API_KEY=${BINGBOT_ELEVEN_LABS_API_KEY}
+      - BINGBOT_OPENAI_API_KEY=${BINGBOT_OPENAI_API_KEY}
+      - BINGBOT_POSTGRES_CONNECTION_STRING=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -7,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Interactions;
 using InteractionFramework;
+using Discord.Commands;
+using System.Linq;
 
 namespace Bingbot
 {
@@ -29,6 +31,7 @@ namespace Bingbot
 
         public Program()
         {
+            Console.WriteLine("Starting Bingbot...");
             _configuration = new ConfigurationBuilder()
                 .AddEnvironmentVariables("BINGBOT_")
                 .Build();
@@ -61,12 +64,23 @@ namespace Bingbot
             await client.LoginAsync(TokenType.Bot, apiKey);
             await client.StartAsync();
 
+            Console.WriteLine("Bingbot is running");
+
             // Block the program until it is closed.
             await Task.Delay(Timeout.Infinite);
         }
 
         private Task LogAsync(LogMessage log)
         {
+            if (log.Exception is CommandException cmdException)
+            {
+                Console.WriteLine($"[Command/{log.Severity}] {cmdException.Command.Aliases.First()}"
+                    + $" failed to execute in {cmdException.Context.Channel}.");
+                Console.WriteLine(cmdException);
+            }
+            else 
+                Console.WriteLine($"[General/{log.Severity}] {log}");
+
             return Task.CompletedTask;
         }
     }

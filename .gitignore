@@ -4,3 +4,4 @@ bin
 obj
 .env**
 appsettings.json
+build/

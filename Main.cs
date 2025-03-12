@@ -56,7 +56,7 @@ namespace Bingbot
 
             client.Log += LogAsync;
 
-            await _services.GetRequiredService<InteractionHandler>()
+            _services.GetRequiredService<InteractionHandler>()
                 .InitializeAsync();
 
             string apiKey = _configuration["DISCORD_API_KEY"];
@@ -78,7 +78,7 @@ namespace Bingbot
                     + $" failed to execute in {cmdException.Context.Channel}.");
                 Console.WriteLine(cmdException);
             }
-            else 
+            else
                 Console.WriteLine($"[General/{log.Severity}] {log}");
 
             return Task.CompletedTask;

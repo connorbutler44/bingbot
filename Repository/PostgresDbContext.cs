@@ -17,4 +17,6 @@ public class DataContext : DbContext
     }
 
     public DbSet<UserLog> UserLogs { get; set; }
+    public DbSet<Poke> Pokes { get; set; }
+    public DbSet<UserSetting> UserSettings { get; set; }
 }

@@ -43,12 +43,33 @@ namespace InteractionFramework
 
             // Process all incoming messages for various use-cases
             _client.MessageReceived += _messageHandler.ProcessMessage;
+
+            // Process when a reaction is added to a message
+            _client.ReactionAdded += OnReactionAddedAsync;
         }
 
         private Task LogAsync(LogMessage log)
         {
             Console.WriteLine(log);
             return Task.CompletedTask;
+        }
+
+        private async Task OnReactionAddedAsync(
+            Cacheable<IUserMessage, ulong> cacheableMessage,
+            Cacheable<IMessageChannel, ulong> cacheableChannel,
+            SocketReaction reaction)
+        {
+            var message = await cacheableMessage.GetOrDownloadAsync();
+
+            var user = reaction.User.Value ?? await _client.GetUserAsync(reaction.UserId);
+
+            if (user.IsBot) return;
+
+            // don't allow boom to use 👍 reactions
+            if (user.Id == 137703871379275776 && reaction.Emote.Name == "👍")
+            {
+                await message.RemoveReactionAsync(reaction.Emote, user);
+            }
         }
     }
 }

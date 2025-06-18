@@ -35,6 +35,13 @@ namespace Bingbot
                 await message.AddReactionAsync(emote);
             }
 
+            if (
+                message.Author.Id == 222553872252534786 &&
+                message.Content.Contains("🅱️"))
+            {
+                await message.DeleteAsync();
+            }
+
             foreach (Match match in urlMatches)
             {
                 // check if the provided link is in our whitelist to process

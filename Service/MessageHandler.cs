@@ -36,7 +36,7 @@ namespace Bingbot
             }
 
             if (
-                message.Author.Id == 222553872252534786 &&
+                message.Author.Id == 191246938685964288 &&
                 message.Content.Contains("🅱️"))
             {
                 await message.DeleteAsync();

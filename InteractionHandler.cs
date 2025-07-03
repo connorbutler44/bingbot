@@ -65,19 +65,7 @@ namespace InteractionFramework
 
             if (user.IsBot) return;
 
-            // boom-specific logic
-            if (user.Id == 137703871379275776) // if (user.Id == 222553872252534786)
-            {
-                var normalizedEmoteName = reaction.Emote.Name.ToLower();
-                var thumbsUpVariants = new[] { "👍", "thumbsup", "thumbs_up", "thumbs-up" };
-
-                // disallow boom from using thumbs up reactions 😈
-                if (Array.Exists(thumbsUpVariants, variant => normalizedEmoteName.Contains(variant)))
-                {
-                    await message.RemoveReactionAsync(reaction.Emote, user);
-                    return;
-                }
-            }
+            return;
         }
     }
 }

@@ -15,15 +15,15 @@ namespace InteractionFramework
         private readonly InteractionService _handler;
         private readonly IServiceProvider _services;
         private readonly IConfiguration _configuration;
-        private readonly MessageHandler _messageHandler;
+        private readonly MessageDispatcher _messageDispatcher;
 
-        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration config, MessageHandler messageHandler)
+        public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration config, MessageDispatcher messageDispatcher)
         {
             _client = client;
             _handler = handler;
             _services = services;
             _configuration = config;
-            _messageHandler = messageHandler;
+            _messageDispatcher = messageDispatcher;
         }
 
         public void InitializeAsync()
@@ -42,7 +42,7 @@ namespace InteractionFramework
             _handler.Log += LogAsync;
 
             // Process all incoming messages for various use-cases
-            _client.MessageReceived += _messageHandler.ProcessMessage;
+            _client.MessageReceived += _messageDispatcher.HandleMessageAsync;
 
             // Process when a reaction is added to a message
             _client.ReactionAdded += OnReactionAddedAsync;

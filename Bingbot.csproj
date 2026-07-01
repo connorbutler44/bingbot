@@ -13,10 +13,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-    <PackageReference Include="CliWrap" Version="3.6.0" />
+    <PackageReference Include="CliWrap" Version="3.10.2" />
     <PackageReference Include="Betalgo.OpenAI" Version="7.4.1" />
     <PackageReference Include="libsodium" Version="1.0.18.4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
     <PackageReference Include="EFCore.NamingConventions" Version="7.0.2" />
+    <PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
   </ItemGroup>
 </Project>

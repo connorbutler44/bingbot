@@ -1,11 +1,17 @@
+# Static ffmpeg/ffprobe binaries (~110MB) instead of Debian's ffmpeg package,
+# which drags in ~400MB of X11/mesa/av library dependencies.
+FROM mwader/static-ffmpeg:7.1 AS ffmpeg
+
 FROM mcr.microsoft.com/dotnet/runtime:10.0
 
-RUN apt-get update && apt-get -y install \
+COPY --from=ffmpeg /ffmpeg /ffprobe /usr/local/bin/
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libopus0 \
-    opus-tools \
     libopus-dev \
     libsodium-dev \
-    ffmpeg \
     python3 \
     python3-pip \
-    && pip3 install --break-system-package -U yt-dlp curl-cffi
+    && pip3 install --break-system-packages --no-cache-dir -U yt-dlp curl-cffi \
+    && apt-get purge -y --auto-remove python3-pip \
+    && rm -rf /var/lib/apt/lists/* /root/.cache /tmp/*

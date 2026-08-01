@@ -9,7 +9,7 @@ For the bot to connect to a voice channel and send audio _in local development_,
 - `libsodium` and `opus` - https://github.com/discord-net/Discord.Net/blob/dev/voice-natives/vnext_natives_win32_x64.zip
   - Extract `libsodium.dll` and `libopus.dll` from the above download
   - Rename `libopus.dll` to `opus.dll`
-  - Move both to where the application is being run from (ex. `./bin/Debug/net6.0`)
+  - Move both to where the application is being run from (ex. `./bin/Debug/net10.0`)
 - `ffmpeg` - https://ffmpeg.org/download.html
 - `yt-dlp` - https://github.com/yt-dlp/yt-dlp/releases
 

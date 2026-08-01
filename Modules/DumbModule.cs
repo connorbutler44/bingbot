@@ -16,9 +16,15 @@ namespace Bingbot.Modules
         }
 
         [SlashCommand("givecookie", "Give Bingbot a Cookie", runMode: RunMode.Async)]
-        public async Task TextToSpeech()
+        public async Task GiveCookie()
         {
             await RespondAsync("<:thankyou:1143324621874151575>");
+        }
+
+        [SlashCommand("givegarlic", "Give Bingbot Garlic", runMode: RunMode.Async)]
+        public async Task GiveGarlic()
+        {
+            await RespondAsync("<:holy:1415754810044580011>");
         }
     }
 }

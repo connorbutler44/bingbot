@@ -47,6 +47,7 @@ namespace Bingbot
                 .AddSingleton<IMessageProcessor, RedditMessageProcessor>()
                 .AddSingleton<IMessageProcessor, TikTokMessageProcessor>()
                 .AddSingleton<IMessageProcessor, JarradMessageProcessor>()
+                .AddSingleton<IMessageProcessor, InstagramMessageProcessor>()
                 .AddSingleton<MessageDispatcher>()
                 .AddSingleton<ChatService>()
                 .AddSingleton<ElevenLabsTextToSpeechService>()

@@ -15,6 +15,16 @@ public class YtDlpService
                 // these two silent flags must be present otherwise yt-dlp throws an exception - possibly a code smell
                 .Add("--quiet")
                 .Add("--no-progress")
+                .Add("-S")
+                .Add("vcodec:h264,acodec:aac,ext:mp4")
+                .Add("--merge-output-format")
+                .Add("mp4")
+                .Add("--remux-video")
+                .Add("mp4")
+                // move the moov atom to the front of the file so mobile clients can start playing
+                // before the whole file has been fetched
+                .Add("--postprocessor-args")
+                .Add("ffmpeg:-movflags +faststart")
                 .Add("-o")
                 .Add(path)
                 .Add(url.ToString()))

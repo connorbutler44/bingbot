@@ -14,7 +14,7 @@ public class TikTokMessageProcessor : IMessageProcessor
             return;
         }
 
-        TempMediaFile mediaFile = await YtDlpService.DownloadStreamAsync(uri);
+        await using var mediaFile = await YtDlpService.DownloadStreamAsync(uri);
         await using FileStream stream = File.OpenRead(mediaFile.Path);
 
         // respond to original message with new video embed

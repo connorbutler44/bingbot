@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -12,6 +13,7 @@ public class DataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        Console.WriteLine(_config["POSTGRES_CONNECTION_STRING"], _config);
         optionsBuilder.UseNpgsql(_config["POSTGRES_CONNECTION_STRING"])
             .UseSnakeCaseNamingConvention();
     }

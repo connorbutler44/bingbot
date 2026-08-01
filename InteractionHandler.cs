@@ -37,8 +37,12 @@ namespace InteractionFramework
             _client.InteractionCreated += async interaction =>
             {
                 var ctx = new SocketInteractionContext(_client, interaction);
-                var test = await _handler.ExecuteCommandAsync(ctx, _services);
+                var result = await _handler.ExecuteCommandAsync(ctx, _services);
+
+                if (!result.IsSuccess)
+                    Console.WriteLine($"[Interaction] Pre-execution failure: {result.Error} - {result.ErrorReason}");
             };
+            _handler.InteractionExecuted += OnInteractionExecutedAsync;
             _handler.Log += LogAsync;
 
             // Process all incoming messages for various use-cases
@@ -52,6 +56,28 @@ namespace InteractionFramework
         {
             Console.WriteLine(log);
             return Task.CompletedTask;
+        }
+
+        private async Task OnInteractionExecutedAsync(ICommandInfo command, IInteractionContext context, IResult result)
+        {
+            if (result.IsSuccess) return;
+
+            Console.WriteLine($"[Interaction] {command?.Name ?? "unknown"} failed: {result.Error} - {result.ErrorReason}");
+
+            if (result is ExecuteResult executeResult && executeResult.Exception != null)
+                Console.WriteLine(executeResult.Exception);
+
+            try
+            {
+                if (context.Interaction.HasResponded)
+                    await context.Interaction.FollowupAsync($"Command failed: {result.ErrorReason}", ephemeral: true);
+                else
+                    await context.Interaction.RespondAsync($"Command failed: {result.ErrorReason}", ephemeral: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Interaction] Failed to report error to user: {ex.Message}");
+            }
         }
 
         private async Task OnReactionAddedAsync(

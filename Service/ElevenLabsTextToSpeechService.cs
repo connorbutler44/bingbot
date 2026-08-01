@@ -28,18 +28,25 @@ namespace Bingbot
             string apiKey = _config["ELEVEN_LABS_API_KEY"];
             string url = $"https://api.elevenlabs.io/v1/text-to-speech/{speaker}";
 
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
 
             request.Content = generateRequestBody(message, stability, clarity);
-
             request.Headers.Add("xi-api-key", apiKey);
             request.Headers.Add("Accept", "audio/mpeg");
 
-            HttpResponseMessage response = await client.SendAsync(request);
+            using HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"ElevenLabs returned {(int)response.StatusCode}: {body}");
+            }
 
-            return await response.Content.ReadAsStreamAsync();
+            var buffer = new MemoryStream();
+            await response.Content.CopyToAsync(buffer);
+            buffer.Position = 0;
+
+            return buffer;
         }
 
         private JsonContent generateRequestBody(string message, int? stability, int? clarity)

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using Discord;
 using Discord.Audio;
+using Discord.WebSocket;
 
 namespace Bingbot
 {
@@ -15,28 +18,49 @@ namespace Bingbot
             _serviceProvider = serviceProvider;
         }
 
-        public void Add(ulong guildID, ulong channelId, IAudioClient audioClient)
+        public async Task Add(ulong guildId, ulong voiceChannelId, IAudioClient audioClient)
         {
-            var outputStream = audioClient.CreatePCMStream(AudioApplication.Mixed);
+            var audioPlayer = new AudioPlayer(voiceChannelId, audioClient);
 
-            var audioPlayer = new AudioPlayer(channelId, audioClient, outputStream);
-            _audioClients[guildID] = audioPlayer;
+            audioClient.Disconnected += ex =>
+            {
+                Console.WriteLine($"[Audio] Disconnected from guild {guildId}: {ex?.Message}");
+                _audioClients.TryRemove(guildId, out _);
+                return Task.CompletedTask;
+            };
+
+            if (_audioClients.TryGetValue(guildId, out var previous) && !ReferenceEquals(previous.AudioClient, audioClient))
+                await previous.DisposeAsync();
+
+            _audioClients[guildId] = audioPlayer;
         }
 
-        public AudioPlayer TryRemove(ulong guildID)
+        public AudioPlayer TryGet(SocketGuild guild)
         {
-            var removed = _audioClients.TryRemove(guildID, out AudioPlayer audioPlayer);
+            var live = guild.AudioClient;
 
-            return audioPlayer;
+            if (live == null || live.ConnectionState != ConnectionState.Connected)
+            {
+                _ = RemoveAsync(guild.Id);
+                return null;
+            }
+
+            if (_audioClients.TryGetValue(guild.Id, out var cached) && ReferenceEquals(cached.AudioClient, live))
+                return cached;   // <- the hot path, hits on every send after the first
+
+            var refreshed = new AudioPlayer(guild.Id, live);
+
+            if (_audioClients.TryRemove(guild.Id, out var stale))
+                _ = stale.DisposeAsync().AsTask();
+
+            _audioClients[guild.Id] = refreshed;
+            return refreshed;
         }
 
-        public AudioPlayer TryGet(ulong guildID)
+        public async Task RemoveAsync(ulong guildId)
         {
-            AudioPlayer audioPlayer;
-
-            _audioClients.TryGetValue(guildID, out audioPlayer);
-
-            return audioPlayer;
+            if (_audioClients.TryRemove(guildId, out var audioPlayer))
+                await audioPlayer.DisposeAsync();
         }
     }
 }

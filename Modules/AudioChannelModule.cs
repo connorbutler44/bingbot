@@ -30,7 +30,7 @@ namespace Bingbot.Modules
             await RespondAsync($"Joining channel {Context.Channel.Name}", ephemeral: true);
 
             var audioClient = await channel.ConnectAsync();
-            _audioChannelManager.Add(Context.Guild.Id, Context.Channel.Id, audioClient);
+            await _audioChannelManager.Add(Context.Guild.Id, Context.Channel.Id, audioClient);
         }
 
         [SlashCommand("disconnect", "Disconnect from channel", runMode: RunMode.Async)]
@@ -42,7 +42,7 @@ namespace Bingbot.Modules
             {
                 var botUser = Context.Guild.GetUser(discordClient.CurrentUser.Id);
                 await botUser.VoiceChannel.DisconnectAsync();
-                _audioChannelManager.TryRemove(Context.Guild.Id);
+                await _audioChannelManager.RemoveAsync(Context.Guild.Id);
                 await RespondAsync("Disconnected from voice channel", ephemeral: true);
             }
             catch (Exception)
@@ -69,7 +69,7 @@ namespace Bingbot.Modules
             [Summary(description: "0-100. Higher values for better clarity but could cause artifacting. Lower if artifacts is present.")]
             int? clarity = null)
         {
-            var client = _audioChannelManager.TryGet(Context.Guild.Id);
+            var client = _audioChannelManager.TryGet(Context.Guild);
 
             if (client == null)
             {

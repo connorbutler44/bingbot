@@ -1,5 +1,3 @@
-# Static ffmpeg/ffprobe binaries (~110MB) instead of Debian's ffmpeg package,
-# which drags in ~400MB of X11/mesa/av library dependencies.
 FROM mwader/static-ffmpeg:7.1 AS ffmpeg
 
 FROM mcr.microsoft.com/dotnet/runtime:10.0

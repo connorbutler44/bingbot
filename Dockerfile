@@ -1,17 +1,15 @@
-FROM mcr.microsoft.com/dotnet/runtime:6.0-bookworm-slim-arm64v8
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
-WORKDIR /app
+WORKDIR /src
 
-COPY ./bin/Release/net6.0/publish .
+COPY Bingbot.csproj ./
+RUN dotnet restore
 
-RUN apt-get update && apt-get -y install \
-    libopus0 \
-    opus-tools \
-    libopus-dev \
-    libsodium-dev \
-    ffmpeg \
-    python3 \
-    python3-pip \
-    && pip3 install --break-system-package -U yt-dlp curl-cffi
+COPY . .
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+FROM bingbot/media-runtime-base
+
+COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "Bingbot.dll"]

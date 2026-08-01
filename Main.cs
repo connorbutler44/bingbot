@@ -49,7 +49,6 @@ namespace Bingbot
                 .AddSingleton<IMessageProcessor, JarradMessageProcessor>()
                 .AddSingleton<IMessageProcessor, InstagramMessageProcessor>()
                 .AddSingleton<MessageDispatcher>()
-                .AddSingleton<ChatService>()
                 .AddSingleton<ElevenLabsTextToSpeechService>()
                 .AddDbContext<DataContext>()
                 .BuildServiceProvider();

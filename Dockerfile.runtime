@@ -5,8 +5,8 @@ FROM mcr.microsoft.com/dotnet/runtime:10.0
 COPY --from=ffmpeg /ffmpeg /ffprobe /usr/local/bin/
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libopus0 \
-    libsodium23 \
+    libopus-dev \
+    libsodium-dev
     libgssapi-krb5-2 \
     python3 \
     python3-pip \

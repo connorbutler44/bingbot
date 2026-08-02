@@ -21,6 +21,7 @@ namespace Bingbot
         {
             GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent | GatewayIntents.GuildPresences,
             AlwaysDownloadUsers = true,
+            EnableVoiceDaveEncryption = true,
         };
 
         static void Main(string[] args)

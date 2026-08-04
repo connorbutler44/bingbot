@@ -42,7 +42,6 @@ namespace Bingbot.Modules
         [SlashCommand("stats", "your poke stats", runMode: RunMode.Async)]
         public async Task PokeStats(
             [Summary(description: "Include stats about your pokes with a specific user")]
-            #nullable enable
             IUser? withUser = null)
         {
             await DeferAsync(ephemeral: true);

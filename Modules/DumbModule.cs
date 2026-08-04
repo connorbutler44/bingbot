@@ -5,7 +5,7 @@ using Discord;
 
 namespace Bingbot.Modules
 {
-    [Group("give", "Steal an emote from another servew")]
+    [Group("give", "Give user something")]
     public class DumbModule : InteractionModuleBase<SocketInteractionContext>
     {
         IServiceProvider _provider;
@@ -18,9 +18,20 @@ namespace Bingbot.Modules
         }
 
         [SlashCommand("cookie", "Give Bingbot a Cookie", runMode: RunMode.Async)]
-        public async Task GiveCookie()
+        public async Task GiveCookie(IUser? user = null)
         {
-            await RespondAsync("<:thankyou:1143324621874151575>");
+            if (user is null)
+            {
+                await RespondAsync("<:thankyou:1143324621874151575>");
+            }
+            else if (user.Id == Context.User.Id)
+            {
+                await RespondAsync($"{user.Mention} has given a cookie to themselves...!");
+            }
+            else
+            {
+                await RespondAsync($"{Context.User.Mention} has given a cookie to {user.Mention}!");
+            }
         }
 
         [SlashCommand("garlic", "Give Garlic", runMode: RunMode.Async)]

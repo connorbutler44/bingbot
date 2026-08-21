@@ -7,7 +7,7 @@ public class InstagramMessageProcessor : IMessageProcessor
 {
     public async Task ProcessAsync(MessageContext messageContext)
     {
-        Uri uri = messageContext.TryGetUrlForHost("instagram.com");
+        Uri? uri = messageContext.TryGetUrlForHost("instagram.com");
 
         if (uri is null)
             return;
@@ -20,7 +20,7 @@ public class InstagramMessageProcessor : IMessageProcessor
 
         // respond to original message with new video embed
         await messageContext.Message.Channel.SendFileAsync(stream, "media.mp4",
-            messageReference: new MessageReference(messageContext.Message.Id));
+            messageReference: new MessageReference(messageContext.Message.Id), isSpoiler: messageContext.MessageHasSpoiler);
 
         // remove original embed
         await messageContext.Message.ModifyAsync(m => m.Flags = MessageFlags.SuppressEmbeds);

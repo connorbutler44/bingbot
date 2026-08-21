@@ -7,7 +7,7 @@ public class TikTokMessageProcessor : IMessageProcessor
 {
     public async Task ProcessAsync(MessageContext messageContext)
     {
-        Uri uri = messageContext.TryGetUrlForHost("tiktok.com");
+        Uri? uri = messageContext.TryGetUrlForHost("tiktok.com");
 
         if (uri is null)
         {
@@ -19,7 +19,7 @@ public class TikTokMessageProcessor : IMessageProcessor
 
         // respond to original message with new video embed
         await messageContext.Message.Channel.SendFileAsync(stream, "media.mp4",
-            messageReference: new MessageReference(messageContext.Message.Id));
+            messageReference: new MessageReference(messageContext.Message.Id), isSpoiler: messageContext.MessageHasSpoiler);
 
         // make sure temp file is disposed of
         await mediaFile.DisposeAsync();

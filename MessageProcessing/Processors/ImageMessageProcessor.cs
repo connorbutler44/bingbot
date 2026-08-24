@@ -147,45 +147,33 @@ public class ImageMessageProcessor : IMessageProcessor
             inset;
 
         // compose layers to new output
-        output.Mutate(ctx => ctx.Paint(canvas =>
+        output.Mutate(ctx =>
         {
             // original image
-            canvas.DrawImage(
+            ctx.DrawImage(
                 image,
-                image.Bounds,
-                new RectangleF(
-                    horizontalPadding,
-                    topPadding,
-                    image.Width,
-                    image.Height));
+                new Point(horizontalPadding, topPadding),
+                1f);
 
             if (icon != null)
             {
-                canvas.DrawImage(
+                ctx.DrawImage(
                     icon,
-                    icon.Bounds,
-                    new RectangleF(
-                        horizontalPadding,
-                        (topPadding - iconSize) / 2,
-                        iconSize,
-                        iconSize));
+                    new Point(horizontalPadding, (topPadding - iconSize) / 2),
+                    1f);
             }
 
-            canvas.DrawText(
+            ctx.DrawText(
                 textOptions,
                 text,
                 Brushes.Solid(Color.LightGray),
                 pen: null);
 
-            canvas.DrawImage(
+            ctx.DrawImage(
                 watermark,
-                watermark.Bounds,
-                new RectangleF(
-                    watermarkX,
-                    watermarkY,
-                    watermarkWidth,
-                    watermarkHeight));
-        }));
+                new Point(watermarkX, watermarkY),
+                1f);
+        });
 
         // round final image corners
         RoundCorners(output, outsideCornerRadius);

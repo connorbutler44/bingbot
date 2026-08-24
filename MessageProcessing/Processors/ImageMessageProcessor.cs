@@ -193,7 +193,9 @@ public class ImageMessageProcessor : IMessageProcessor
     private static readonly string[] PreferredFontFamilies =
     [
         "Arial",
-        "DejaVu Sans"
+        "Liberation Sans",
+        "DejaVu Sans",
+        "Helvetica"
     ];
 
     private static FontFamily ResolveFontFamily()
@@ -208,8 +210,7 @@ public class ImageMessageProcessor : IMessageProcessor
 
         if (fallback == default)
         {
-            throw new InvalidOperationException(
-                "No system fonts are installed.");
+            throw new InvalidOperationException("No system fonts are installed");
         }
 
         return fallback;

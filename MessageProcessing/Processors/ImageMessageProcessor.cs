@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -72,8 +73,9 @@ public class ImageMessageProcessor : IMessageProcessor
         MakeCircle(icon);
 
         // prepare text
-        var regularFont = SystemFonts.CreateFont("Arial", 24);
-        var boldFont = SystemFonts.CreateFont("Arial", 24, FontStyle.Bold);
+        var fontFamily = ResolveFontFamily();
+        var regularFont = fontFamily.CreateFont(24);
+        var boldFont = fontFamily.CreateFont(24, FontStyle.Bold);
 
         var prefix = $"From {communityName} community on";
         var discordText = " Discord";
@@ -186,6 +188,31 @@ public class ImageMessageProcessor : IMessageProcessor
             attachment.Filename,
             messageReference: new Discord.MessageReference(messageContext.Message.Id),
             isSpoiler: messageContext.MessageHasSpoiler);
+    }
+
+    private static readonly string[] PreferredFontFamilies =
+    [
+        "Arial",
+        "DejaVu Sans"
+    ];
+
+    private static FontFamily ResolveFontFamily()
+    {
+        foreach (var name in PreferredFontFamilies)
+        {
+            if (SystemFonts.TryGet(name, out var family))
+                return family;
+        }
+
+        var fallback = SystemFonts.Families.FirstOrDefault();
+
+        if (fallback == default)
+        {
+            throw new InvalidOperationException(
+                "No system fonts are installed.");
+        }
+
+        return fallback;
     }
 
     private static void MakeCircle(Image<Rgba32> image)

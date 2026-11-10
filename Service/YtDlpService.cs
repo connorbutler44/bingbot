@@ -1,11 +1,47 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CliWrap;
+using CliWrap.Buffered;
 using System.Threading;
 
 public class YtDlpService
 {
+    public static async Task<bool> HasVideoAsync(Uri url, CancellationToken cancellationToken = default)
+    {
+        var result = await Cli.Wrap("yt-dlp")
+            .WithArguments(args => args
+                .Add("--quiet")
+                .Add("--no-warnings")
+                .Add("--no-progress")
+                .Add("--dump-single-json")
+                .Add(url.ToString()))
+            .WithValidation(CommandResultValidation.None)
+            .ExecuteBufferedAsync(cancellationToken);
+
+        if (result.ExitCode != 0 || string.IsNullOrWhiteSpace(result.StandardOutput))
+            return false;
+
+        using JsonDocument metadata = JsonDocument.Parse(result.StandardOutput);
+
+        return ContainsVideo(metadata.RootElement);
+    }
+
+    private static bool ContainsVideo(JsonElement entry)
+    {
+        if (entry.TryGetProperty("entries", out JsonElement entries) && entries.ValueKind == JsonValueKind.Array)
+            return entries.EnumerateArray().Any(ContainsVideo);
+
+        if (entry.TryGetProperty("vcodec", out JsonElement vcodec) && vcodec.ValueKind == JsonValueKind.String)
+            return !string.Equals(vcodec.GetString(), "none", StringComparison.OrdinalIgnoreCase);
+
+        return entry.TryGetProperty("formats", out JsonElement formats)
+            && formats.ValueKind == JsonValueKind.Array
+            && formats.EnumerateArray().Any(ContainsVideo);
+    }
+
     public static async Task<TempMediaFile> DownloadStreamAsync(Uri url, CancellationToken cancellationToken = default)
     {
         var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".mp4");

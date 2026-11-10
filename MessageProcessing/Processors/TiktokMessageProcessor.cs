@@ -14,6 +14,11 @@ public class TikTokMessageProcessor : IMessageProcessor
             return;
         }
 
+        if (!await YtDlpService.HasVideoAsync(uri))
+        {
+            return;
+        }
+
         await using var mediaFile = await YtDlpService.DownloadStreamAsync(uri);
         await using FileStream stream = File.OpenRead(mediaFile.Path);
 

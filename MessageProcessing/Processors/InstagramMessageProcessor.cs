@@ -12,7 +12,13 @@ public class InstagramMessageProcessor : IMessageProcessor
         if (uri is null)
             return;
 
-        if (!uri.AbsolutePath.Contains("reel"))
+        bool isReel = uri.AbsolutePath.Contains("reel");
+        bool isPost = uri.AbsolutePath.Contains("/p/");
+
+        if (!isReel && !isPost)
+            return;
+
+        if (!isReel && !await YtDlpService.HasVideoAsync(uri))
             return;
 
         await using var mediaFile = await YtDlpService.DownloadStreamAsync(uri);
